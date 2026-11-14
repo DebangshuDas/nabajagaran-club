@@ -39,14 +39,15 @@ management:
       show-details: when_authorized
 
 # Temporary startup diagnostics
-debug=true
+debug: true
 
-logging.level:
-  root: INFO
-logging.level.org.springframework: INFO
-logging.level.org.springframework.boot.autoconfigure: DEBUG
-logging.level.org.springframework.beans.factory: DEBUG
-logging.level.org.springframework.orm.jpa: DEBUG
-logging.level.org.hibernate: INFO
-logging.level.org.hibernate.tool.schema: DEBUG
-logging.level.com.zaxxer.hikari: DEBUG
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    org.springframework.boot.autoconfigure: DEBUG
+    org.springframework.beans.factory: DEBUG
+    org.springframework.orm.jpa: DEBUG
+    org.hibernate: INFO
+    org.hibernate.tool.schema: DEBUG
+    com.zaxxer.hikari: DEBUG
