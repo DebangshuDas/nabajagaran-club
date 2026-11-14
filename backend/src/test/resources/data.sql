@@ -1,3 +1,22 @@
+UPDATE club_information
+SET tagline = 'Celebrating culture, community, and belonging',
+    description = 'A demo profile for the nabajagaran-club community website.',
+    mission = 'To build a connected and inclusive community through cultural events and service.',
+    founding_year = 2008,
+    address = '123 Demo Street',
+    city = 'Demo City',
+    state = 'Demo State',
+    country = 'Demo Country',
+    postal_code = '00000',
+    email = 'hello@example.com',
+    phone = '000-000-0000',
+    website = 'https://example.com/nabajagaran-club',
+    facebook_url = 'https://example.com/nabajagaran-club/facebook',
+    instagram_url = 'https://example.com/nabajagaran-club/instagram',
+    deleted = FALSE,
+    deleted_at = NULL
+WHERE name = 'nabajagaran-club';
+
 INSERT INTO club_information (
     name, tagline, description, mission, founding_year, address, city, state, country,
     postal_code, email, phone, website, facebook_url, instagram_url,
