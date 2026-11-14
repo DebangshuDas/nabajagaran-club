@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Cormorant Garamond", "Noto Serif Bengali", Georgia, serif;
+  --font-sans: "Outfit", "Segoe UI", sans-serif;
+  --font-bengali: "Noto Serif Bengali", "Cormorant Garamond", serif;
+
+  --color-maroon: #7b1e2b;
+  --color-maroon-dark: #50131d;
+  --color-gold: #c4922e;
+  --color-gold-soft: #f3e6c8;
+  --color-ivory: #faf7f0;
+  --color-ink: #292321;
+  --color-muted: #6f6864;
+  --color-line: #e6dccb;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ivory);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: #7b1e2b;
+  color: #faf7f0;
+}
+
+.alpana {
+  background-image:
+    radial-gradient(circle at 12px 12px, rgb(212 168 79 / 0.45) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 28px 28px, rgb(250 247 240 / 0.28) 0 1px, transparent 1.6px);
+  background-size: 40px 40px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

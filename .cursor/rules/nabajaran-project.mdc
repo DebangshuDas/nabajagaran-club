@@ -1,0 +1,70 @@
+---
+alwaysApply: true
+---
+# Project: Nabajaran Club
+
+## Product Objective
+Build a modern, responsive community website and management
+platform for Nabajaran Club, a local cultural and social
+welfare organization in West Bengal, India.
+
+## Technology Stack
+Frontend:
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- React Router
+- Axios
+- Lucide React
+
+Backend:
+- Java 21
+- Spring Boot
+- Spring Data JPA
+- Spring Web
+- PostgreSQL
+- Gradle
+
+## Architecture
+- Keep frontend and backend independent.
+- Frontend communicates with backend only through REST APIs.
+- Follow layered architecture in Spring Boot.
+- Use Controller, Service, Repository, Entity and DTO layers.
+- Do not put business logic inside controllers.
+- Keep API request and response DTOs separate from entities.
+- Use environment variables for secrets and credentials.
+
+## Frontend Standards
+- Use reusable React components.
+- Use functional components and React hooks.
+- Use TypeScript interfaces and types.
+- Maintain a consistent design system.
+- Create responsive mobile-first layouts.
+- Handle loading, error and empty states.
+- Avoid unnecessary dependencies.
+
+## Backend Standards
+- Follow REST API conventions.
+- Implement request validation.
+- Use proper exception handling.
+- Use DTOs for API communication.
+- Use pagination for list endpoints where appropriate.
+- Avoid exposing database entities directly.
+- Write meaningful unit and integration tests.
+
+## Security
+- Never expose secrets or passwords in frontend code.
+- Validate all incoming requests.
+- Protect administrative endpoints.
+- Do not expose private member information publicly.
+- Use role-based authorization for administrative operations.
+
+## Development Rules
+- Inspect existing code before modifying it.
+- Do not overwrite working functionality unnecessarily.
+- Explain significant architectural decisions.
+- Implement features incrementally.
+- Run relevant tests after making changes.
+- Do not introduce unrelated features.
+- Keep the application maintainable and scalable.
