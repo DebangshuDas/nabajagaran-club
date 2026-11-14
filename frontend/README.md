@@ -27,9 +27,11 @@ The backend allows the production site origin
 
 ## Admin dashboard
 
-Open `/admin` and sign in with the admin credentials configured on the backend using `ADMIN_USERNAME` and `ADMIN_PASSWORD`. The dashboard currently displays live counts for upcoming events, published announcements, and approved businesses. The remaining management modules are marked as coming soon.
+Open `/admin` and sign in with the admin credentials configured on the backend using `ADMIN_USERNAME` and `ADMIN_PASSWORD`. The dashboard currently displays live counts for upcoming events, published announcements, and approved businesses. The remaining management modules have protected route placeholders only.
 
-The dashboard sends credentials to backend-protected `/api/v1/admin/**` routes and keeps them in memory only; refreshing the page requires signing in again. Configure HTTPS for deployed environments.
+The frontend sends HTTP Basic credentials to backend-protected `/api/v1/admin/**` routes and keeps the authorization value in memory only; refreshing the page requires signing in again. The backend remains stateless and verifies each admin request. Configure HTTPS for deployed environments.
+
+For a future login-experience improvement, consider a backend-managed short-lived session using a `Secure`, `HttpOnly`, `SameSite` cookie, or an OIDC Authorization Code flow with PKCE. Keep authorization enforcement on the backend and do not persist credentials or tokens in `localStorage` or `sessionStorage`.
 
 ## Commands
 

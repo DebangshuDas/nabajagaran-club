@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { SiteLayout } from "./components/layout/SiteLayout";
 import { AdminLayout } from "./components/layout/AdminLayout";
+import { AdminModulePlaceholder } from "./pages/admin/AdminModulePlaceholder";
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
@@ -20,6 +21,15 @@ export default function App() {
       <Routes>
         <Route path="admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboardPage />} />
+          <Route path="events" element={<AdminModulePlaceholder title="Events" />} />
+          <Route path="announcements" element={<AdminModulePlaceholder title="Announcements" />} />
+          <Route path="businesses" element={<AdminModulePlaceholder title="Business directory" />} />
+          <Route path="membership" element={<AdminModulePlaceholder title="Membership" />} />
+          <Route path="volunteers" element={<AdminModulePlaceholder title="Volunteers" />} />
+          <Route path="gallery" element={<AdminModulePlaceholder title="Gallery" />} />
+          <Route path="sponsors" element={<AdminModulePlaceholder title="Sponsors" />} />
+          <Route path="messages" element={<AdminModulePlaceholder title="Contact messages" />} />
+          <Route path="club-profile" element={<AdminModulePlaceholder title="Club profile" />} />
         </Route>
         <Route element={<SiteLayout />}>
           <Route index element={<HomePage />} />

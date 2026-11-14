@@ -2,6 +2,7 @@ import { useCallback, useState, type FormEvent } from "react";
 import {
   ArrowUpRight,
   BadgeCheck,
+  Building2,
   CalendarDays,
   HandHeart,
   Images,
@@ -16,19 +17,20 @@ import {
   X,
 } from "lucide-react";
 import axios from "axios";
-import { Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { getAdminDashboard } from "../../services/adminService";
 
 const navigation = [
-  { label: "Dashboard", icon: LayoutDashboard, active: true },
-  { label: "Events", icon: CalendarDays },
-  { label: "Announcements", icon: Megaphone },
-  { label: "Membership", icon: Users },
-  { label: "Volunteers", icon: HandHeart },
-  { label: "Business directory", icon: Store },
-  { label: "Sponsors", icon: BadgeCheck },
-  { label: "Gallery", icon: Images },
-  { label: "Contact messages", icon: MessageSquareText },
+  { label: "Dashboard", to: "/admin", icon: LayoutDashboard },
+  { label: "Events", to: "/admin/events", icon: CalendarDays },
+  { label: "Announcements", to: "/admin/announcements", icon: Megaphone },
+  { label: "Membership", to: "/admin/membership", icon: Users },
+  { label: "Volunteers", to: "/admin/volunteers", icon: HandHeart },
+  { label: "Business directory", to: "/admin/businesses", icon: Store },
+  { label: "Sponsors", to: "/admin/sponsors", icon: BadgeCheck },
+  { label: "Gallery", to: "/admin/gallery", icon: Images },
+  { label: "Contact messages", to: "/admin/messages", icon: MessageSquareText },
+  { label: "Club profile", to: "/admin/club-profile", icon: Building2 },
 ];
 
 export function AdminLayout() {
@@ -36,6 +38,10 @@ export function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { pathname } = useLocation();
   const onLogout = useCallback(() => setAuthorization(null), []);
+  const activeSection =
+    navigation.find(
+      ({ to }) => pathname === to || (to !== "/admin" && pathname.startsWith(`${to}/`)),
+    )?.label ?? "Dashboard";
 
   if (!authorization) {
     return (
@@ -44,8 +50,6 @@ export function AdminLayout() {
       />
     );
   }
-
-  const activeSection = pathname === "/admin" ? "Dashboard" : "Dashboard";
 
   return (
     <div className="admin-shell min-h-screen bg-[#f7f8fa] text-slate-900">
@@ -85,26 +89,39 @@ export function AdminLayout() {
             WORKSPACE
           </p>
           <nav aria-label="Admin navigation" className="space-y-1">
-            {navigation.map(({ label, icon: Icon, active }) => (
-              <div
-                key={label}
-                aria-current={active ? "page" : undefined}
-                aria-disabled={!active}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium ${
-                  active
-                    ? "bg-[#f8eff0] text-[#7b1e2b]"
-                    : "cursor-not-allowed text-slate-500"
-                }`}
-                title={active ? undefined : "This module will be available in a later release"}
+            {navigation.map(({ label, to, icon: Icon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={to === "/admin"}
+                onClick={() => setIsSidebarOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium ${
+                    isActive
+                      ? "bg-[#f8eff0] text-[#7b1e2b]"
+                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                  }`
+                }
+                title={to === "/admin" ? undefined : "This module is a route placeholder"}
               >
-                <Icon size={17} strokeWidth={1.8} />
-                <span className="flex-1">{label}</span>
-                {!active && (
-                  <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-400">
-                    Soon
-                  </span>
+                {({ isActive }) => (
+                  <>
+                    <Icon size={17} strokeWidth={1.8} />
+                    <span className="flex-1">{label}</span>
+                    {to !== "/admin" && (
+                      <span
+                        className={`rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${
+                          isActive
+                            ? "bg-white/70 text-[#7b1e2b]"
+                            : "bg-slate-100 text-slate-400"
+                        }`}
+                      >
+                        Soon
+                      </span>
+                    )}
+                  </>
                 )}
-              </div>
+              </NavLink>
             ))}
           </nav>
         </div>
