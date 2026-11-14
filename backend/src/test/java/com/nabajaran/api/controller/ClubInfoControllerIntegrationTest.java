@@ -17,11 +17,13 @@ import org.springframework.test.context.jdbc.Sql;
 
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = "app.cors.allowed-origins=https://frontend.example.test")
+        properties = "app.cors.allowed-origins=https://nabajagaran-club.debangshudas2001.workers.dev")
 @ActiveProfiles("test")
 @Sql("classpath:data.sql")
 class ClubInfoControllerIntegrationTest {
 
+    private static final String FRONTEND_ORIGIN =
+            "https://nabajagaran-club.debangshudas2001.workers.dev";
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
     @Autowired
@@ -53,7 +55,7 @@ class ClubInfoControllerIntegrationTest {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("http://localhost:" + port + endpoint))
                     .header("Accept", "application/json")
-                    .header("Origin", "https://frontend.example.test")
+                    .header("Origin", FRONTEND_ORIGIN)
                     .GET()
                     .build();
 
@@ -61,11 +63,68 @@ class ClubInfoControllerIntegrationTest {
 
             assertThat(response.statusCode()).isEqualTo(200);
             assertThat(response.headers().firstValue("Access-Control-Allow-Origin"))
-                    .contains("https://frontend.example.test");
+                    .contains(FRONTEND_ORIGIN);
             assertThat(response.headers().firstValue("Content-Type").orElse(""))
                     .contains("application/json");
             assertThat(response.body()).startsWith("[");
         }
+    }
+
+    @Test
+    void shouldReturnClubDetailsWithConfiguredFrontendCorsOrigin() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:" + port + "/api/v1/club"))
+                .header("Accept", "application/json")
+                .header("Origin", FRONTEND_ORIGIN)
+                .GET()
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.headers().firstValue("Access-Control-Allow-Origin"))
+                .contains(FRONTEND_ORIGIN);
+        assertThat(response.body()).contains("\"clubName\":\"nabajagaran-club\"");
+    }
+
+    @Test
+    void shouldHandleCorsPreflightForConfiguredFrontendOrigin() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:" + port + "/api/v1/events/upcoming"))
+                .header("Origin", FRONTEND_ORIGIN)
+                .header("Access-Control-Request-Method", "GET")
+                .header("Access-Control-Request-Headers", "authorization,content-type")
+                .method("OPTIONS", HttpRequest.BodyPublishers.noBody())
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        String allowedHeaders = response.headers()
+                .firstValue("Access-Control-Allow-Headers")
+                .orElse("")
+                .toLowerCase(java.util.Locale.ROOT);
+
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.headers().firstValue("Access-Control-Allow-Origin"))
+                .contains(FRONTEND_ORIGIN);
+        assertThat(response.headers().firstValue("Access-Control-Allow-Methods").orElse(""))
+                .contains("GET");
+        assertThat(allowedHeaders).contains("authorization", "content-type");
+        assertThat(response.headers().firstValue("Access-Control-Allow-Credentials")).isEmpty();
+    }
+
+    @Test
+    void shouldRejectCorsPreflightFromUnconfiguredOrigin() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:" + port + "/api/v1/events/upcoming"))
+                .header("Origin", "https://unconfigured.example")
+                .header("Access-Control-Request-Method", "GET")
+                .method("OPTIONS", HttpRequest.BodyPublishers.noBody())
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertThat(response.statusCode()).isEqualTo(403);
+        assertThat(response.headers().firstValue("Access-Control-Allow-Origin")).isEmpty();
     }
 
     @Test

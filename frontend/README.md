@@ -16,12 +16,14 @@ Vite proxies requests under `/api` to `http://localhost:8080`. Open the local UR
 ## Deployment API URL
 
 The Vite proxy is for local development only. In Cloudflare Pages, set the build environment
-variable `VITE_API_BASE_URL` to the Render API base URL, including `/api/v1` (for example,
-`https://<render-service>.onrender.com/api/v1`). This value is public and must not contain
-credentials. Production requests fail with a visible configuration error if it is missing.
+variable `VITE_API_BASE_URL` to the Render service origin, for example
+`https://nabajaran-api.onrender.com`. The frontend appends `/api/v1` automatically and avoids
+duplicating it if already present. This value is public and must not contain credentials.
+Production requests fail with a visible configuration error if it is missing.
 
-Configure the backend's `APP_CORS_ALLOWED_ORIGINS` with the exact Cloudflare Pages site origin.
-The backend uses that allowlist for cross-origin API access.
+The backend allows the production site origin
+`https://nabajagaran-club.debangshudas2001.workers.dev` by default. Configure
+`APP_CORS_ALLOWED_ORIGINS` in Render if the frontend origin changes.
 
 ## Admin dashboard
 
