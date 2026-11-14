@@ -6,22 +6,29 @@ import type {
   EventResponse,
 } from "../types/api";
 
+async function getArrayResponse<T>(endpoint: string): Promise<T[]> {
+  const response = await api.get<unknown>(endpoint);
+
+  if (!Array.isArray(response.data)) {
+    throw new Error(`Invalid API response from ${endpoint}: expected a JSON array.`);
+  }
+
+  return response.data;
+}
+
 export async function getClubDetails() {
   const response = await api.get<ClubDetailsResponse>("/club");
   return response.data;
 }
 
 export async function getUpcomingEvents() {
-  const response = await api.get<EventResponse[]>("/events/upcoming");
-  return response.data;
+  return getArrayResponse<EventResponse>("/events/upcoming");
 }
 
 export async function getPublishedAnnouncements() {
-  const response = await api.get<AnnouncementResponse[]>("/announcements/published");
-  return response.data;
+  return getArrayResponse<AnnouncementResponse>("/announcements/published");
 }
 
 export async function getApprovedBusinesses() {
-  const response = await api.get<BusinessResponse[]>("/businesses/approved");
-  return response.data;
+  return getArrayResponse<BusinessResponse>("/businesses/approved");
 }

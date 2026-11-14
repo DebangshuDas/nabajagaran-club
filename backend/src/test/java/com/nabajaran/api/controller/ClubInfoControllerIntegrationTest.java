@@ -15,7 +15,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = "app.cors.allowed-origins=https://frontend.example.test")
 @ActiveProfiles("test")
 @Sql("classpath:data.sql")
 class ClubInfoControllerIntegrationTest {
@@ -43,6 +45,27 @@ class ClubInfoControllerIntegrationTest {
                 .contains("\"clubName\":\"nabajagaran-club\"")
                 .contains("\"city\":\"Demo City\"")
                 .contains("\"email\":\"hello@example.com\"");
+    }
+
+    @Test
+    void shouldReturnPublicCollectionsAsJsonArraysAndAllowConfiguredFrontendOrigin() throws Exception {
+        for (String endpoint : List.of("/api/v1/events/upcoming", "/api/v1/announcements/published")) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:" + port + endpoint))
+                    .header("Accept", "application/json")
+                    .header("Origin", "https://frontend.example.test")
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            assertThat(response.statusCode()).isEqualTo(200);
+            assertThat(response.headers().firstValue("Access-Control-Allow-Origin"))
+                    .contains("https://frontend.example.test");
+            assertThat(response.headers().firstValue("Content-Type").orElse(""))
+                    .contains("application/json");
+            assertThat(response.body()).startsWith("[");
+        }
     }
 
     @Test

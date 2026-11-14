@@ -13,6 +13,16 @@ npm run dev
 
 Vite proxies requests under `/api` to `http://localhost:8080`. Open the local URL printed by Vite, normally `http://localhost:5173`.
 
+## Deployment API URL
+
+The Vite proxy is for local development only. In Cloudflare Pages, set the build environment
+variable `VITE_API_BASE_URL` to the Render API base URL, including `/api/v1` (for example,
+`https://<render-service>.onrender.com/api/v1`). This value is public and must not contain
+credentials. Production requests fail with a visible configuration error if it is missing.
+
+Configure the backend's `APP_CORS_ALLOWED_ORIGINS` with the exact Cloudflare Pages site origin.
+The backend uses that allowlist for cross-origin API access.
+
 ## Admin dashboard
 
 Open `/admin` and sign in with the admin credentials configured on the backend using `ADMIN_USERNAME` and `ADMIN_PASSWORD`. The dashboard currently displays live counts for upcoming events, published announcements, and approved businesses. The remaining management modules are marked as coming soon.
