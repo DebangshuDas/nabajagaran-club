@@ -49,14 +49,6 @@ SELECT
     CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM club_info);
 
-UPDATE club_information
-SET name = 'nabajagaran-club'
-WHERE name = 'Nabajaran Club';
-
-UPDATE club_info
-SET club_name = 'nabajagaran-club'
-WHERE club_name = 'Nabajaran Club';
-
 INSERT INTO business_categories (
     name, slug, description, is_active, created_at, updated_at, deleted, deleted_at
 )

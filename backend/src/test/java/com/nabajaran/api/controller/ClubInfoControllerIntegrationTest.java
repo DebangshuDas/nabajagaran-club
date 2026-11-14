@@ -17,6 +17,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@Sql("classpath:data.sql")
 class ClubInfoControllerIntegrationTest {
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
@@ -45,7 +46,6 @@ class ClubInfoControllerIntegrationTest {
     }
 
     @Test
-    @Sql("classpath:data.sql")
     void shouldSeedEveryTableOnStartup() {
         String query = """
                 SELECT COUNT(*) FROM club_info
