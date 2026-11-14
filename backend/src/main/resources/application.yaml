@@ -37,3 +37,16 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+
+# Temporary startup diagnostics
+debug=true
+
+logging.level:
+  root: INFO
+logging.level.org.springframework: INFO
+logging.level.org.springframework.boot.autoconfigure: DEBUG
+logging.level.org.springframework.beans.factory: DEBUG
+logging.level.org.springframework.orm.jpa: DEBUG
+logging.level.org.hibernate: INFO
+logging.level.org.hibernate.tool.schema: DEBUG
+logging.level.com.zaxxer.hikari: DEBUG
