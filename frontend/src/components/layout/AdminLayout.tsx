@@ -62,12 +62,12 @@ export function AdminLayout() {
         }`}
       >
         <div className="flex h-[76px] items-center justify-between border-b border-slate-100 px-6">
-          <a className="flex items-center gap-3" href="/admin" aria-label="Nabajaran Club admin home">
+          <a className="flex items-center gap-3" href="/admin" aria-label="nabajagaran-club admin home">
             <span className="grid size-10 place-items-center rounded-xl bg-[#7b1e2b] text-lg font-semibold text-white">
               N
             </span>
             <span>
-              <span className="block font-semibold tracking-tight text-slate-900">Nabajaran Club</span>
+              <span className="block font-semibold tracking-tight text-slate-900">nabajagaran-club</span>
               <span className="block text-xs text-slate-500">ADMINISTRATION</span>
             </span>
           </a>
@@ -207,7 +207,7 @@ function AdminLogin({
             N
           </span>
           <div>
-            <p className="font-semibold tracking-tight text-slate-900">Nabajaran Club</p>
+            <p className="font-semibold tracking-tight text-slate-900">nabajagaran-club</p>
             <p className="text-xs text-slate-500">Administrator sign in</p>
           </div>
         </div>

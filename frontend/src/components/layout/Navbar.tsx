@@ -20,7 +20,7 @@ export function Navbar() {
         <Link to="/" className="min-w-0">
           <span className="block font-bengali text-sm leading-none text-gold">নবজাগরণ</span>
           <span className="mt-1 block font-display text-2xl leading-none text-maroon">
-            Nabajaran Club
+            nabajagaran-club
           </span>
         </Link>
         <div className="flex items-center gap-3">

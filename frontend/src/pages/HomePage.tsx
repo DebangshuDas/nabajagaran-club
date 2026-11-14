@@ -62,7 +62,7 @@ export default function HomePage() {
     };
   }, []);
 
-  const clubName = club?.clubName ?? "Nabajaran Club";
+  const clubName = club?.clubName ?? "nabajagaran-club";
   const clubTagline = club?.tagline ?? "Celebrating culture, community, and belonging";
   const clubDescription =
     club?.description ??

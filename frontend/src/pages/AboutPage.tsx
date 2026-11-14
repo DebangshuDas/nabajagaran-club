@@ -24,7 +24,7 @@ export default function AboutPage() {
         bengali="পরিচয়"
         eyebrow="About us"
         title="A public home for the club."
-        lede="Nabajaran Club is a Bengali cultural and community welfare organization in West Bengal. This page is ready for the club’s own account of its purpose and people."
+        lede="nabajagaran-club is a Bengali cultural and community welfare organization in West Bengal. This page is ready for the club’s own account of its purpose and people."
         photoLabel="Photograph — club gathering"
       />
       <section className="mx-auto grid max-w-6xl gap-12 px-5 py-20 md:px-8 lg:grid-cols-[1fr_1fr]">

@@ -1,6 +1,6 @@
-# Nabajaran Club
+# nabajagaran-club
 
-Nabajaran Club is a community website and administration dashboard for managing club content and operations.
+nabajagaran-club is a community website and administration dashboard for managing club content and operations.
 
 ## Technology
 

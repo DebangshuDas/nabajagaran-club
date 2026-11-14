@@ -96,7 +96,7 @@ export default function MembershipPage() {
           </button>
           {kept ? (
             <p className="text-sm leading-relaxed text-maroon" role="status">
-              Held in this browser only, {name.trim() || "friend"}. Nabajaran Club has not received it.
+              Held in this browser only, {name.trim() || "friend"}. nabajagaran-club has not received it.
             </p>
           ) : (
             <p className="text-sm text-muted">Nothing on this form is stored on a server.</p>

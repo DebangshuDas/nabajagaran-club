@@ -65,7 +65,7 @@ export default function ContactPage() {
           </button>
           {kept ? (
             <p className="text-sm leading-relaxed text-maroon" role="status">
-              Saved only in this browser session. Nothing was sent to Nabajaran Club.
+              Saved only in this browser session. Nothing was sent to nabajagaran-club.
             </p>
           ) : (
             <p className="text-sm text-muted">This form is not connected to a server.</p>

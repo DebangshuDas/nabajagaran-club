@@ -39,7 +39,7 @@ class ClubInfoControllerIntegrationTest {
 
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.body())
-                .contains("\"clubName\":\"Nabajaran Club\"")
+                .contains("\"clubName\":\"nabajagaran-club\"")
                 .contains("\"city\":\"Demo City\"")
                 .contains("\"email\":\"hello@example.com\"");
     }

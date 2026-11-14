@@ -1,4 +1,4 @@
-# Nabajaran Club Database Design
+# nabajagaran-club Database Design
 
 This schema is designed for a single-club platform with privacy-minded member data and public-facing listings.
 

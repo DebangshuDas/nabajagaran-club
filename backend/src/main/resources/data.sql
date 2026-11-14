@@ -4,9 +4,9 @@ INSERT INTO club_information (
     created_at, updated_at, deleted, deleted_at
 )
 SELECT
-    'Nabajaran Club',
+    'nabajagaran-club',
     'Celebrating culture, community, and belonging',
-    'A demo profile for the Nabajaran Club community website.',
+    'A demo profile for the nabajagaran-club community website.',
     'To build a connected and inclusive community through cultural events and service.',
     2008,
     '123 Demo Street',
@@ -16,9 +16,9 @@ SELECT
     '00000',
     'hello@example.com',
     '000-000-0000',
-    'https://example.com/nabajaran-club',
-    'https://example.com/nabajaran-club/facebook',
-    'https://example.com/nabajaran-club/instagram',
+    'https://example.com/nabajagaran-club',
+    'https://example.com/nabajagaran-club/facebook',
+    'https://example.com/nabajagaran-club/instagram',
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP,
     FALSE,
@@ -30,9 +30,9 @@ INSERT INTO club_info (
     postal_code, email, phone, website, facebook_url, instagram_url, created_at, updated_at
 )
 SELECT
-    'Nabajaran Club',
+    'nabajagaran-club',
     'Celebrating culture, community, and belonging',
-    'A demo profile for the Nabajaran Club community website.',
+    'A demo profile for the nabajagaran-club community website.',
     'To build a connected and inclusive community through cultural events and service.',
     2008,
     '123 Demo Street',
@@ -42,12 +42,20 @@ SELECT
     '00000',
     'hello@example.com',
     '000-000-0000',
-    'https://example.com/nabajaran-club',
-    'https://example.com/nabajaran-club/facebook',
-    'https://example.com/nabajaran-club/instagram',
+    'https://example.com/nabajagaran-club',
+    'https://example.com/nabajagaran-club/facebook',
+    'https://example.com/nabajagaran-club/instagram',
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 WHERE NOT EXISTS (SELECT 1 FROM club_info);
+
+UPDATE club_information
+SET name = 'nabajagaran-club'
+WHERE name = 'Nabajaran Club';
+
+UPDATE club_info
+SET club_name = 'nabajagaran-club'
+WHERE club_name = 'Nabajaran Club';
 
 INSERT INTO business_categories (
     name, slug, description, is_active, created_at, updated_at, deleted, deleted_at

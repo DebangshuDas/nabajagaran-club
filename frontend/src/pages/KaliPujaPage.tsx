@@ -11,7 +11,7 @@ export default function KaliPujaPage() {
       tone="night"
       aboutTitle="A night festival, with the club’s details still to come."
       about={[
-        "Across West Bengal, Kali Puja lights the same night as Diwali. Homes and community pandals keep their own customs. This paragraph describes that shared calendar, not a Nabajaran Club observance.",
+        "Across West Bengal, Kali Puja lights the same night as Diwali. Homes and community pandals keep their own customs. This paragraph describes that shared calendar, not a nabajagaran-club observance.",
         "The club can use this page for its lighting, cultural items, and gathering place. Until those are provided, the page stays open rather than inventing a venue or a time.",
       ]}
       moments={[
@@ -24,7 +24,7 @@ export default function KaliPujaPage() {
           <p className="text-xs font-medium tracking-[0.18em] text-maroon uppercase">This year</p>
           <h2 className="mt-3 font-display text-3xl text-maroon">No confirmed night yet</h2>
           <p className="mt-3 text-sm leading-relaxed text-ink/80">
-            Nabajaran Club has not published a Kali Puja time or place on this site.
+            nabajagaran-club has not published a Kali Puja time or place on this site.
           </p>
           <Link to="/gallery" className="mt-6 inline-flex text-sm font-medium text-maroon underline">
             Gallery frames

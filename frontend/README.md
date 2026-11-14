@@ -1,4 +1,4 @@
-# Nabajaran Club frontend
+# nabajagaran-club frontend
 
 The frontend is a React and TypeScript application built with Vite and Tailwind CSS. It contains the public community website and the first increment of the admin dashboard.
 

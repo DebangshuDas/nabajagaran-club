@@ -11,7 +11,7 @@ export function Footer() {
       <div className="mx-auto grid max-w-6xl gap-12 px-5 py-16 md:grid-cols-2 md:px-8 lg:grid-cols-4">
         <div>
           <p className="font-bengali text-gold">নবজাগরণ</p>
-          <p className="mt-2 font-display text-3xl">Nabajaran Club</p>
+          <p className="mt-2 font-display text-3xl">nabajagaran-club</p>
           <p className="mt-4 text-sm leading-relaxed text-ivory/75">
             A Bengali cultural and community welfare organization in West Bengal, India.
           </p>
@@ -53,7 +53,7 @@ export function Footer() {
       </div>
       <div className="border-t border-ivory/10">
         <p className="mx-auto max-w-6xl px-5 py-5 text-xs text-ivory/60 md:px-8">
-          © {year} Nabajaran Club. Programme text on this site is placeholder copy until the club publishes its own.
+          © {year} nabajagaran-club. Programme text on this site is placeholder copy until the club publishes its own.
         </p>
       </div>
     </footer>
