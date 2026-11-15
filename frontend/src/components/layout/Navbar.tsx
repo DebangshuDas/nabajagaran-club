@@ -9,7 +9,7 @@ function linkClass(isActive: boolean) {
   }`;
 }
 
-export function Navbar() {
+export function Navbar({ clubName }: { clubName?: string | null }) {
   const { pathname } = useLocation();
   const [openPath, setOpenPath] = useState<string | null>(null);
   const open = openPath === pathname;
@@ -20,7 +20,7 @@ export function Navbar() {
         <Link to="/" className="min-w-0">
           <span className="block font-bengali text-sm leading-none text-gold">নবজাগরণ</span>
           <span className="mt-1 block font-display text-2xl leading-none text-maroon">
-            nabajagaran-club
+            {clubName?.trim() || "Nabajagaran Club"}
           </span>
         </Link>
         <div className="flex items-center gap-3">

@@ -8,9 +8,26 @@ import type {
   AnnouncementCreateRequest,
   AnnouncementResponse,
   AnnouncementUpdateRequest,
+  ClubDetailsResponse,
+  ClubProfileUpdateRequest,
   EventRequest,
   EventResponse,
 } from "../types/api";
+
+export async function getClubProfile() {
+  const response = await api.get<ClubDetailsResponse>("/club");
+  return response.data;
+}
+
+export async function updateClubProfile(
+  authorization: string,
+  request: ClubProfileUpdateRequest,
+) {
+  const response = await api.put<ClubDetailsResponse>("/admin/club", request, {
+    headers: { Authorization: authorization },
+  });
+  return response.data;
+}
 
 export async function getAnnouncements(
   authorization: string,

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AnnouncementContent } from "../components/ui/AnnouncementContent";
@@ -10,14 +10,14 @@ import { LoadingState } from "../components/ui/LoadingState";
 import { PhotoPlaceholder } from "../components/ui/PhotoPlaceholder";
 import { SectionHeading } from "../components/ui/SectionHeading";
 import {
-  getClubDetails,
   getPublishedAnnouncements,
   getUpcomingEvents,
 } from "../services/siteService";
-import type { AnnouncementResponse, ClubDetailsResponse, EventResponse } from "../types/api";
+import type { AnnouncementResponse, EventResponse } from "../types/api";
+import type { SiteLayoutContext } from "../components/layout/SiteLayout";
 
 export default function HomePage() {
-  const [club, setClub] = useState<ClubDetailsResponse | null>(null);
+  const { club, clubLoading, clubError } = useOutletContext<SiteLayoutContext>();
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [announcements, setAnnouncements] = useState<AnnouncementResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,15 +31,13 @@ export default function HomePage() {
         setLoading(true);
         setError(null);
 
-        const [clubResponse, eventResponse, announcementResponse] = await Promise.all([
-          getClubDetails(),
+        const [eventResponse, announcementResponse] = await Promise.all([
           getUpcomingEvents(),
           getPublishedAnnouncements(),
         ]);
 
         if (!isMounted) return;
 
-        setClub(clubResponse);
         setEvents(eventResponse);
         setAnnouncements(announcementResponse);
       } catch (loadError) {
@@ -63,13 +61,11 @@ export default function HomePage() {
     };
   }, []);
 
-  const clubName = club?.clubName ?? "nabajagaran-club";
-  const clubTagline = club?.tagline ?? "Celebrating culture, community, and belonging";
-  const clubDescription =
-    club?.description ??
-    "A Bengali cultural and community welfare organisation rooted in celebration, learning, and local care.";
+  const clubName = club?.clubName?.trim() || "Nabajagaran Club";
+  const clubTagline = club?.tagline?.trim();
+  const clubDescription = club?.description?.trim();
 
-  if (loading) {
+  if (loading || clubLoading) {
     return (
       <div className="mx-auto max-w-6xl px-5 py-20 md:px-8">
         <LoadingState message="Loading club and event information..." />
@@ -94,8 +90,15 @@ export default function HomePage() {
             <h1 className="mt-4 font-display text-5xl leading-[1.02] sm:text-6xl md:text-7xl">
               {clubName}
             </h1>
-            <p className="mt-4 text-lg text-gold">{clubTagline}</p>
-            <p className="mt-6 max-w-lg text-lg leading-relaxed text-ivory/80">{clubDescription}</p>
+            {clubTagline && <p className="mt-4 text-lg text-gold">{clubTagline}</p>}
+            {clubDescription && (
+              <p className="mt-6 max-w-lg text-lg leading-relaxed text-ivory/80">{clubDescription}</p>
+            )}
+            {clubError && (
+              <p className="mt-4 max-w-lg text-sm text-ivory/70" role="status">
+                Club profile information is temporarily unavailable.
+              </p>
+            )}
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 to="/membership"

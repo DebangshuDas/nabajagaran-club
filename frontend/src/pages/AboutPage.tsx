@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import { PageHero } from "../components/ui/PageHero";
-import { PlaceholderNote } from "../components/ui/PlaceholderNote";
+import type { SiteLayoutContext } from "../components/layout/SiteLayout";
 
 const roles = [
   {
@@ -18,29 +18,44 @@ const roles = [
 ];
 
 export default function AboutPage() {
+  const { club, clubLoading, clubError } = useOutletContext<SiteLayoutContext>();
+  const clubName = club?.clubName?.trim() || "About the club";
+  const tagline = club?.tagline?.trim();
+  const description = club?.description?.trim();
+  const mission = club?.mission?.trim();
+
   return (
     <>
       <PageHero
         bengali="পরিচয়"
         eyebrow="About us"
-        title="A public home for the club."
-        lede="nabajagaran-club is a Bengali cultural and community welfare organization in West Bengal. This page is ready for the club’s own account of its purpose and people."
+        title={clubName}
+        lede={tagline || "Club profile information."}
         photoLabel="Photograph — club gathering"
       />
       <section className="mx-auto grid max-w-6xl gap-12 px-5 py-20 md:px-8 lg:grid-cols-[1fr_1fr]">
         <div className="space-y-5 text-lg leading-relaxed text-ink/90">
-          <p>
-            The club’s name, place in West Bengal, and twin concerns — Bengali culture and community
-            welfare — are the facts this website starts from.
-          </p>
-          <p>
-            A history, a list of office bearers, and a street address are not invented here. When the
-            club shares them, they belong in this column.
-          </p>
-          <PlaceholderNote>
-            Do not treat the surrounding pages as a record of past programmes. They show the
-            structure the club can fill.
-          </PlaceholderNote>
+          {clubLoading ? (
+            <p role="status">Loading club profile...</p>
+          ) : clubError ? (
+            <p role="status">Club profile information is temporarily unavailable.</p>
+          ) : (
+            <>
+              {description && <p>{description}</p>}
+              {mission && (
+                <div>
+                  <h2 className="font-display text-3xl text-maroon">Our Mission</h2>
+                  <p className="mt-2">{mission}</p>
+                </div>
+              )}
+              {club?.foundedYear && (
+                <p className="text-base text-muted">Founded in {club.foundedYear}.</p>
+              )}
+              {!description && !mission && !club?.foundedYear && (
+                <p className="text-base text-muted">Club profile details have not been provided yet.</p>
+              )}
+            </>
+          )}
         </div>
         <div className="grid gap-4">
           {roles.map((role) => (

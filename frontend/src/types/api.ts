@@ -19,6 +19,24 @@ export interface ClubDetailsResponse {
   updatedAt: string;
 }
 
+export interface ClubProfileUpdateRequest {
+  clubName: string;
+  tagline: string | null;
+  description: string | null;
+  mission: string | null;
+  foundedYear: number | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  country: string | null;
+  postalCode: string | null;
+  email: string | null;
+  phone: string | null;
+  website: string | null;
+  facebookUrl: string | null;
+  instagramUrl: string | null;
+}
+
 export interface EventResponse {
   id: number;
   title: string;

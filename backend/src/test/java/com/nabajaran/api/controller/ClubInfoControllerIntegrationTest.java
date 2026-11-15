@@ -6,7 +6,12 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +29,8 @@ class ClubInfoControllerIntegrationTest {
 
     private static final String FRONTEND_ORIGIN =
             "https://nabajagaran-club.debangshudas2001.workers.dev";
+    private static final String ADMIN_AUTHORIZATION = "Basic " + Base64.getEncoder()
+            .encodeToString("admin:test-admin-password".getBytes(StandardCharsets.UTF_8));
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
     @Autowired
@@ -199,5 +206,204 @@ class ClubInfoControllerIntegrationTest {
                 .contains("\"approvedBusinesses\":1")
                 .doesNotContain("Demo Member")
                 .doesNotContain("demo.member@example.com");
+    }
+
+    @Test
+    void shouldUpdateTheExistingClubProfileAndExposeChangesPublicly() throws Exception {
+        Map<String, Object> original = jdbcTemplate.queryForMap(
+                "SELECT * FROM club_information WHERE deleted = FALSE ORDER BY id LIMIT 1");
+        long originalId = ((Number) original.get("id")).longValue();
+        String beforeResponse = getClubResponse().body();
+        String originalCreatedAt = jsonString(beforeResponse, "createdAt");
+        String originalUpdatedAt = jsonString(beforeResponse, "updatedAt");
+        Map<String, Object> request = validProfileRequest("Updated Club " + UUID.randomUUID());
+        request.put("mission", "A new club mission.");
+
+        try {
+            HttpResponse<String> updateResponse = send(
+                    "PUT",
+                    "/api/v1/admin/club",
+                    toJson(request),
+                    true);
+            assertThat(updateResponse.statusCode()).isEqualTo(200);
+            assertThat(jsonLong(updateResponse.body(), "id")).isEqualTo(originalId);
+            assertThat(jsonString(updateResponse.body(), "createdAt")).isEqualTo(originalCreatedAt);
+            assertThat(jsonString(updateResponse.body(), "updatedAt")).isNotEqualTo(originalUpdatedAt);
+            assertThat(jsonString(updateResponse.body(), "mission")).isEqualTo("A new club mission.");
+
+            String publicProfile = getClubResponse().body();
+            assertThat(jsonString(publicProfile, "clubName")).isEqualTo(request.get("clubName"));
+            assertThat(jsonString(publicProfile, "mission")).isEqualTo("A new club mission.");
+        } finally {
+            restoreClubProfile(original);
+        }
+    }
+
+    @Test
+    void shouldValidateProfileFieldsAndRequireAdminForUpdates() throws Exception {
+        Map<String, Object> request = validProfileRequest("Validation Club");
+        assertThat(send("PUT", "/api/v1/admin/club", toJson(request), false)
+                .statusCode()).isEqualTo(401);
+
+        request.put("clubName", " ");
+        assertThat(send("PUT", "/api/v1/admin/club", toJson(request), true)
+                .statusCode()).isEqualTo(400);
+
+        request = validProfileRequest("Validation Club");
+        request.put("email", "not-an-email");
+        HttpResponse<String> invalidEmail = send(
+                "PUT", "/api/v1/admin/club", toJson(request), true);
+        assertThat(invalidEmail.statusCode()).isEqualTo(400);
+        assertThat(invalidEmail.body()).contains("Email must be a valid email address.");
+
+        request = validProfileRequest("Validation Club");
+        request.put("website", "javascript:alert(1)");
+        HttpResponse<String> invalidUrl = send(
+                "PUT", "/api/v1/admin/club", toJson(request), true);
+        assertThat(invalidUrl.statusCode()).isEqualTo(400);
+        assertThat(invalidUrl.body()).contains("Website must be a valid HTTP or HTTPS URL.");
+
+        request = validProfileRequest("Validation Club");
+        request.put("foundedYear", 2999);
+        assertThat(send("PUT", "/api/v1/admin/club", toJson(request), true)
+                .statusCode()).isEqualTo(400);
+    }
+
+    @Test
+    void shouldRejectMissingOrMultipleActiveClubProfiles() throws Exception {
+        jdbcTemplate.update("UPDATE club_information SET deleted = TRUE, deleted_at = CURRENT_TIMESTAMP");
+        try {
+            assertThat(getClubResponse().statusCode()).isEqualTo(404);
+            assertThat(send(
+                    "PUT",
+                    "/api/v1/admin/club",
+                    toJson(validProfileRequest("No Profile")),
+                    true).statusCode()).isEqualTo(404);
+        } finally {
+            jdbcTemplate.update("UPDATE club_information SET deleted = FALSE, deleted_at = NULL");
+        }
+
+        String duplicateName = "Duplicate profile " + UUID.randomUUID();
+        jdbcTemplate.update(
+                "INSERT INTO club_information (name, created_at, updated_at, deleted) "
+                        + "VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, FALSE)",
+                duplicateName);
+        try {
+            assertThat(getClubResponse().statusCode()).isEqualTo(409);
+            assertThat(send(
+                    "PUT",
+                    "/api/v1/admin/club",
+                    toJson(validProfileRequest("Multiple Profiles")),
+                    true).statusCode()).isEqualTo(409);
+        } finally {
+            jdbcTemplate.update("DELETE FROM club_information WHERE name = ?", duplicateName);
+        }
+    }
+
+    private HttpResponse<String> getClubResponse() throws Exception {
+        return send("GET", "/api/v1/club", null, false);
+    }
+
+    private Map<String, Object> validProfileRequest(String clubName) {
+        Map<String, Object> request = new LinkedHashMap<>();
+        request.put("clubName", clubName);
+        request.put("tagline", "A club tagline");
+        request.put("description", "A club description.");
+        request.put("mission", "A club mission.");
+        request.put("foundedYear", 2008);
+        request.put("address", "123 Example Street");
+        request.put("city", "Example City");
+        request.put("state", "Example State");
+        request.put("country", "Example Country");
+        request.put("postalCode", "00000");
+        request.put("email", "club@example.com");
+        request.put("phone", "+1 555 0100");
+        request.put("website", "https://example.com");
+        request.put("facebookUrl", "https://facebook.com/example");
+        request.put("instagramUrl", "https://instagram.com/example");
+        return request;
+    }
+
+    private void restoreClubProfile(Map<String, Object> original) {
+        jdbcTemplate.update(
+                """
+                UPDATE club_information
+                SET name = ?, tagline = ?, description = ?, mission = ?, founding_year = ?,
+                    address = ?, city = ?, state = ?, country = ?, postal_code = ?, email = ?,
+                    phone = ?, website = ?, facebook_url = ?, instagram_url = ?, updated_at = ?
+                WHERE id = ?
+                """,
+                original.get("name"),
+                original.get("tagline"),
+                original.get("description"),
+                original.get("mission"),
+                original.get("founding_year"),
+                original.get("address"),
+                original.get("city"),
+                original.get("state"),
+                original.get("country"),
+                original.get("postal_code"),
+                original.get("email"),
+                original.get("phone"),
+                original.get("website"),
+                original.get("facebook_url"),
+                original.get("instagram_url"),
+                original.get("updated_at"),
+                original.get("id"));
+    }
+
+    private String toJson(Map<String, Object> values) {
+        String fields = values.entrySet().stream()
+                .map(entry -> "\"" + entry.getKey() + "\":" + jsonValue(entry.getValue()))
+                .collect(java.util.stream.Collectors.joining(","));
+        return "{" + fields + "}";
+    }
+
+    private String jsonValue(Object value) {
+        if (value == null) return "null";
+        if (value instanceof Number || value instanceof Boolean) return value.toString();
+        String escaped = value.toString()
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r");
+        return "\"" + escaped + "\"";
+    }
+
+    private String jsonString(String json, String field) {
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile(
+                "\"" + java.util.regex.Pattern.quote(field) + "\"\\s*:\\s*\"((?:\\\\.|[^\"\\\\])*)\"")
+                .matcher(json);
+        assertThat(matcher.find()).as("JSON field %s", field).isTrue();
+        return matcher.group(1);
+    }
+
+    private long jsonLong(String json, String field) {
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile(
+                "\"" + java.util.regex.Pattern.quote(field) + "\"\\s*:\\s*(-?\\d+)")
+                .matcher(json);
+        assertThat(matcher.find()).as("JSON field %s", field).isTrue();
+        return Long.parseLong(matcher.group(1));
+    }
+
+    private HttpResponse<String> send(String method, String path, String body, boolean authenticated)
+            throws Exception {
+        HttpRequest.Builder request = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:" + port + path))
+                .header("Accept", "application/json");
+        if (authenticated) {
+            request.header("Authorization", ADMIN_AUTHORIZATION);
+        }
+        if (body != null) {
+            request.header("Content-Type", "application/json");
+        }
+        return httpClient.send(
+                request.method(
+                        method,
+                        body == null
+                                ? HttpRequest.BodyPublishers.noBody()
+                                : HttpRequest.BodyPublishers.ofString(body))
+                        .build(),
+                HttpResponse.BodyHandlers.ofString());
     }
 }

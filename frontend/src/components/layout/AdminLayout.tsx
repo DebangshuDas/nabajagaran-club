@@ -36,8 +36,16 @@ const navigation = [
 export function AdminLayout() {
   const [authorization, setAuthorization] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { pathname } = useLocation();
-  const onLogout = useCallback(() => setAuthorization(null), []);
+  const onLogout = useCallback(() => {
+    setHasUnsavedChanges(false);
+    setAuthorization(null);
+  }, []);
+  const onUnsavedChangesChange = useCallback(
+    (hasChanges: boolean) => setHasUnsavedChanges(hasChanges),
+    [],
+  );
   const activeSection =
     navigation.find(
       ({ to }) => pathname === to || (to !== "/admin" && pathname.startsWith(`${to}/`)),
@@ -94,7 +102,16 @@ export function AdminLayout() {
                 key={to}
                 to={to}
                 end={to === "/admin"}
-                onClick={() => setIsSidebarOpen(false)}
+                onClick={(event) => {
+                  if (pathname !== to && hasUnsavedChanges) {
+                    if (!window.confirm("Leave this page and discard unsaved changes?")) {
+                      event.preventDefault();
+                      return;
+                    }
+                    setHasUnsavedChanges(false);
+                  }
+                  setIsSidebarOpen(false);
+                }}
                 className={({ isActive }) =>
                   `flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium ${
                     isActive
@@ -103,7 +120,7 @@ export function AdminLayout() {
                   }`
                 }
                 title={
-                  to === "/admin" || label === "Announcements"
+                  to === "/admin" || label === "Announcements" || label === "Club profile"
                     ? undefined
                     : "This module is a route placeholder"
                 }
@@ -112,7 +129,7 @@ export function AdminLayout() {
                   <>
                     <Icon size={17} strokeWidth={1.8} />
                     <span className="flex-1">{label}</span>
-                    {to !== "/admin" && label !== "Announcements" && (
+                    {to !== "/admin" && label !== "Announcements" && label !== "Club profile" && (
                       <span
                         className={`rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${
                           isActive
@@ -142,7 +159,11 @@ export function AdminLayout() {
           </div>
           <button
             className="mt-3 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[13px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800"
-            onClick={() => setAuthorization(null)}
+            onClick={() => {
+              if (hasUnsavedChanges && !window.confirm("Sign out and discard unsaved changes?")) return;
+              setHasUnsavedChanges(false);
+              setAuthorization(null);
+            }}
           >
             <LogOut size={17} />
             Sign out
@@ -178,7 +199,7 @@ export function AdminLayout() {
           </div>
         </header>
         <main className="mx-auto max-w-[1440px] px-5 py-8 sm:px-8 lg:px-10">
-          <Outlet context={{ authorization, onLogout }} />
+          <Outlet context={{ authorization, onLogout, onUnsavedChangesChange }} />
         </main>
       </div>
     </div>

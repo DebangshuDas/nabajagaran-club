@@ -4,6 +4,7 @@ import { AdminLayout } from "./components/layout/AdminLayout";
 import { AdminModulePlaceholder } from "./pages/admin/AdminModulePlaceholder";
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 import { AnnouncementsManagementPage } from "./pages/admin/AnnouncementsManagementPage";
+import { ClubProfileManagementPage } from "./pages/admin/ClubProfileManagementPage";
 import { EventsManagementPage } from "./pages/admin/EventsManagementPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
@@ -31,7 +32,7 @@ export default function App() {
           <Route path="gallery" element={<AdminModulePlaceholder title="Gallery" />} />
           <Route path="sponsors" element={<AdminModulePlaceholder title="Sponsors" />} />
           <Route path="messages" element={<AdminModulePlaceholder title="Contact messages" />} />
-          <Route path="club-profile" element={<AdminModulePlaceholder title="Club profile" />} />
+          <Route path="club-profile" element={<ClubProfileManagementPage />} />
         </Route>
         <Route element={<SiteLayout />}>
           <Route index element={<HomePage />} />
