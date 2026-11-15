@@ -26,7 +26,7 @@ export interface EventResponse {
   description: string;
   shortDescription?: string | null;
   eventType: string;
-  status: string;
+  status: EventStatus;
   startAt: string;
   endAt?: string | null;
   venue?: string | null;
@@ -36,6 +36,39 @@ export interface EventResponse {
   imageUrl?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export type EventStatus = "UPCOMING" | "ONGOING" | "COMPLETED";
+
+export interface EventRequest {
+  title: string;
+  shortDescription: string | null;
+  description: string;
+  eventType: string;
+  status: EventStatus;
+  startAt: string;
+  endAt: string | null;
+  venue: string | null;
+  address: string | null;
+  capacity: number | null;
+  imageUrl: string | null;
+  published: boolean;
+}
+
+export interface AdminEventPageResponse {
+  content: EventResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface AdminEventQuery {
+  search: string;
+  status: EventStatus | "";
+  published: boolean | undefined;
+  page: number;
+  size: number;
 }
 
 export interface AnnouncementResponse {

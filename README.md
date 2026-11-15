@@ -25,7 +25,7 @@ Set-Location backend
 .\gradlew.bat bootRun
 ```
 
-The API starts at `http://localhost:8080`. If `ADMIN_PASSWORD` is blank or unset, admin endpoints reject all requests.
+The API starts at `http://localhost:8080`. If `ADMIN_PASSWORD` is blank or unset, admin endpoints reject all requests. The local backend allows the Vite origin `http://localhost:5173`; set `APP_CORS_ALLOWED_ORIGINS` to a comma-separated origin list to override it.
 
 ### 2. Start the frontend
 

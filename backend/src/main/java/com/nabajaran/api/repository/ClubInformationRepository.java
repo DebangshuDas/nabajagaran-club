@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 public interface ClubInformationRepository extends JpaRepository<ClubInformation, Long> {
 
     Optional<ClubInformation> findFirstByOrderByIdAsc();
+
+    Optional<ClubInformation> findFirstByDeletedFalseOrderByIdAsc();
 }
