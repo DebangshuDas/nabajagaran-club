@@ -248,6 +248,7 @@ export interface FestivalEditionResponse {
   year: number;
   theme?: string | null;
   description?: string | null;
+  featuredHighlights?: string | null;
   startDate?: string | null;
   endDate?: string | null;
   venue?: string | null;
@@ -264,6 +265,7 @@ export interface FestivalEditionRequest {
   year: number;
   theme: string | null;
   description: string | null;
+  featuredHighlights: string | null;
   startDate: string | null;
   endDate: string | null;
   venue: string | null;

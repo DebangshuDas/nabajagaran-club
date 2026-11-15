@@ -17,6 +17,8 @@ type FestivalLayoutProps = {
   about: string[];
   moments: Moment[];
   aside: ReactNode;
+  coverImageUrl?: string | null;
+  children?: ReactNode;
 };
 
 export function FestivalLayout({
@@ -29,6 +31,8 @@ export function FestivalLayout({
   about,
   moments,
   aside,
+  coverImageUrl,
+  children,
 }: FestivalLayoutProps) {
   return (
     <>
@@ -39,7 +43,21 @@ export function FestivalLayout({
             <h1 className="mt-4 font-display text-5xl leading-[1.05] md:text-6xl">{title}</h1>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-ivory/80">{lede}</p>
           </div>
-          <PhotoPlaceholder label={photoLabel} tone={tone} className="min-h-80" />
+          {coverImageUrl ? (
+            <div className="relative min-h-80 overflow-hidden bg-maroon-dark">
+              <img
+                alt={photoLabel}
+                className="absolute inset-0 size-full object-cover"
+                src={coverImageUrl}
+              />
+              <div className="absolute inset-0 bg-black/25" />
+              <p className="absolute right-6 bottom-5 left-6 font-display text-xl text-ivory sm:text-2xl">
+                {photoLabel}
+              </p>
+            </div>
+          ) : (
+            <PhotoPlaceholder label={photoLabel} tone={tone} className="min-h-80" />
+          )}
         </div>
       </section>
       <section className="mx-auto grid max-w-6xl gap-12 px-5 py-20 md:px-8 lg:grid-cols-[1.2fr_0.8fr]">
@@ -61,6 +79,7 @@ export function FestivalLayout({
         </div>
         <aside className="h-fit border border-gold/40 bg-gold-soft/40 p-6">{aside}</aside>
       </section>
+      {children}
     </>
   );
 }

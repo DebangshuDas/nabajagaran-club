@@ -160,6 +160,7 @@ public class FestivalEditionService {
         edition.setYear(request.year());
         edition.setTheme(cleanOptional(request.theme()));
         edition.setDescription(cleanOptional(request.description()));
+        edition.setFeaturedHighlights(cleanOptional(request.featuredHighlights()));
         edition.setStartDate(request.startDate());
         edition.setEndDate(request.endDate());
         edition.setVenue(cleanOptional(request.venue()));
@@ -266,6 +267,7 @@ public class FestivalEditionService {
                 edition.getYear(),
                 edition.getTheme(),
                 edition.getDescription(),
+                edition.getFeaturedHighlights(),
                 edition.getStartDate(),
                 edition.getEndDate(),
                 edition.getVenue(),

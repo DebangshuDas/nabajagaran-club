@@ -11,6 +11,7 @@ public record FestivalEditionResponse(
         Integer year,
         String theme,
         String description,
+        String featuredHighlights,
         LocalDate startDate,
         LocalDate endDate,
         String venue,

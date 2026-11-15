@@ -305,10 +305,16 @@ export function FestivalsManagementPage() {
         title="Festival management"
         description="Manage reusable festival profiles and their annual editions."
         actions={
-          <Link className={primaryButtonClass} to="/admin/festivals/new">
-            <Plus size={16} />
-            Create festival
-          </Link>
+          <>
+            <Link className={buttonClass} to="/admin/festivals/durga-puja">
+              <CalendarDays size={16} />
+              Manage Durga Puja
+            </Link>
+            <Link className={primaryButtonClass} to="/admin/festivals/new">
+              <Plus size={16} />
+              Create festival
+            </Link>
+          </>
         }
       />
       {toast && (
@@ -390,6 +396,12 @@ const emptyFestivalForm: FestivalForm = {
   published: false,
 };
 
+const initialDurgaPujaForm: FestivalForm = {
+  ...emptyFestivalForm,
+  name: "Durga Puja",
+  slug: "durga-puja",
+};
+
 function toFestivalForm(festival: FestivalResponse): FestivalForm {
   return {
     name: festival.name,
@@ -417,25 +429,56 @@ export function FestivalEditorPage() {
     useOutletContext<AdminOutletContext>();
   const { festivalId = "" } = useParams();
   const navigate = useNavigate();
-  const isNew = festivalId === "new";
+  const isNewRoute = festivalId === "new";
+  const isDurgaSlugRoute = festivalId === "durga-puja";
   const numericId = Number(festivalId);
-  const invalidFestivalId = !isNew && (!Number.isSafeInteger(numericId) || numericId <= 0);
+  const invalidFestivalId =
+    !isNewRoute
+    && !isDurgaSlugRoute
+    && (!Number.isSafeInteger(numericId) || numericId <= 0);
+  const [resolvedFestivalId, setResolvedFestivalId] = useState<number | null>(
+    isDurgaSlugRoute || isNewRoute ? null : numericId,
+  );
+  const [isMissingDurgaProfile, setIsMissingDurgaProfile] = useState(false);
   const [form, setForm] = useState<FestivalForm>(emptyFestivalForm);
   const [initialForm, setInitialForm] = useState<FestivalForm>(emptyFestivalForm);
-  const [isLoading, setIsLoading] = useState(!isNew);
+  const [isLoading, setIsLoading] = useState(!isNewRoute);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<Toast | null>(null);
   const [savedFestival, setSavedFestival] = useState<FestivalResponse | null>(null);
+  const isNew = isNewRoute || (isDurgaSlugRoute && isMissingDurgaProfile);
   const dirty = JSON.stringify(form) !== JSON.stringify(initialForm);
 
   useEffect(() => {
-    if (isNew || invalidFestivalId) return;
+    if (isNewRoute || invalidFestivalId) return;
     let active = true;
-    getAdminFestival(authorization, numericId)
+    const festivalPromise = isDurgaSlugRoute
+      ? getAdminFestivals(authorization, {
+          search: "durga-puja",
+          published: undefined,
+          page: 0,
+          size: 100,
+        }).then((response) => {
+          const festival = response.content.find((item) => item.slug === "durga-puja");
+          if (!festival) {
+            if (active) {
+              setResolvedFestivalId(null);
+              setIsMissingDurgaProfile(true);
+              setForm(initialDurgaPujaForm);
+              setInitialForm(emptyFestivalForm);
+            }
+            return null;
+          }
+          return festival;
+        })
+      : getAdminFestival(authorization, numericId);
+    festivalPromise
       .then((festival) => {
-        if (!active) return;
+        if (!active || !festival) return;
         const nextForm = toFestivalForm(festival);
+        setResolvedFestivalId(festival.id);
+        setIsMissingDurgaProfile(false);
         setForm(nextForm);
         setInitialForm(nextForm);
         setSavedFestival(festival);
@@ -449,7 +492,7 @@ export function FestivalEditorPage() {
     return () => {
       active = false;
     };
-  }, [authorization, festivalId, invalidFestivalId, isNew, numericId, onLogout]);
+  }, [authorization, festivalId, invalidFestivalId, isDurgaSlugRoute, isNewRoute, numericId, onLogout]);
 
   useEffect(() => {
     onUnsavedChangesChange(dirty);
@@ -481,14 +524,16 @@ export function FestivalEditorPage() {
       const request = festivalRequest(form);
       const festival = isNew
         ? await createAdminFestival(authorization, request)
-        : await updateAdminFestival(authorization, numericId, request);
+        : await updateAdminFestival(authorization, resolvedFestivalId ?? numericId, request);
       const nextForm = toFestivalForm(festival);
+      setResolvedFestivalId(festival.id);
+      setIsMissingDurgaProfile(false);
       setForm(nextForm);
       setInitialForm(nextForm);
       setSavedFestival(festival);
       setToast({ message: isNew ? "Festival profile created." : "Festival changes saved.", variant: "success" });
       onUnsavedChangesChange(false);
-      if (isNew) navigate(`/admin/festivals/${festival.id}`, { replace: true });
+      if (isNewRoute) navigate(`/admin/festivals/${festival.id}`, { replace: true });
     } catch (saveError) {
       setToast({
         message: getErrorMessage(saveError, "Festival profile could not be saved.", onLogout),
@@ -517,8 +562,18 @@ export function FestivalEditorPage() {
     <div className="space-y-6">
       <BackLink hasUnsavedChanges={dirty} to="/admin/festivals">Festival profiles</BackLink>
       <AdminPageHeader
-        title={isNew ? "Create festival" : `Edit ${savedFestival?.name ?? "festival"}`}
-        description="Festival profiles are reusable across all annual editions."
+        title={
+          isDurgaSlugRoute
+            ? "Manage Durga Puja"
+            : isNew
+              ? "Create festival"
+              : `Edit ${savedFestival?.name ?? "festival"}`
+        }
+        description={
+          isDurgaSlugRoute
+            ? "Manage the Durga Puja profile and its annual editions using the shared festival system."
+            : "Festival profiles are reusable across all annual editions."
+        }
         actions={
           savedFestival && (
             <Link
@@ -788,6 +843,7 @@ type EditionForm = {
   year: string;
   theme: string;
   description: string;
+  featuredHighlights: string;
   startDate: string;
   endDate: string;
   venue: string;
@@ -802,6 +858,7 @@ const emptyEditionForm: EditionForm = {
   year: "",
   theme: "",
   description: "",
+  featuredHighlights: "",
   startDate: "",
   endDate: "",
   venue: "",
@@ -817,6 +874,7 @@ function toEditionForm(edition: FestivalEditionResponse): EditionForm {
     year: String(edition.year),
     theme: edition.theme ?? "",
     description: edition.description ?? "",
+    featuredHighlights: edition.featuredHighlights ?? "",
     startDate: edition.startDate ?? "",
     endDate: edition.endDate ?? "",
     venue: edition.venue ?? "",
@@ -833,6 +891,7 @@ function editionRequest(form: EditionForm): FestivalEditionRequest {
     year: Number(form.year),
     theme: form.theme.trim() || null,
     description: form.description.trim() || null,
+    featuredHighlights: form.featuredHighlights.trim() || null,
     startDate: form.startDate || null,
     endDate: form.endDate || null,
     venue: form.venue.trim() || null,
@@ -1074,6 +1133,19 @@ export function FestivalEditionEditorPage() {
           <label className={`${labelClass} sm:col-span-2`}>
             Edition description
             <textarea className={`${inputClass} min-h-28`} maxLength={20000} onChange={(event) => setValue("description", event.target.value)} value={form.description} />
+          </label>
+          <label className={`${labelClass} sm:col-span-2`}>
+            Featured highlights
+            <textarea
+              className={`${inputClass} min-h-28`}
+              maxLength={10000}
+              onChange={(event) => setValue("featuredHighlights", event.target.value)}
+              placeholder="Enter one highlight per line"
+              value={form.featuredHighlights}
+            />
+            <span className="mt-1 block text-xs font-normal text-slate-500">
+              Each non-empty line is displayed as a separate highlight.
+            </span>
           </label>
           <label className="flex items-center gap-2 text-sm font-medium text-slate-700 sm:col-span-2">
             <input checked={form.published} onChange={(event) => setValue("published", event.target.checked)} type="checkbox" />

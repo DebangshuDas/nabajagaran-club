@@ -138,7 +138,7 @@ class AdminFestivalControllerIntegrationTest {
 
         HttpResponse<String> secondEdition = createEdition(
                 festivalId,
-                editionRequest(2031, false, List.of(), List.of(), List.of()));
+                editionRequest(2031, true, List.of(), List.of(), List.of()));
         assertThat(secondEdition.statusCode()).isEqualTo(201);
 
         HttpResponse<String> duplicateYear = createEdition(
@@ -210,6 +210,8 @@ class AdminFestivalControllerIntegrationTest {
                 false);
         assertThat(publicFestival.statusCode()).isEqualTo(200);
         assertThat(publicFestival.body()).contains("\"year\":2030");
+        assertThat(publicFestival.body()).contains("\"year\":2031");
+        assertThat(publicFestival.body()).contains("Community meal service\\n");
         assertThat(publicFestival.body()).contains("Community Welcome Gathering");
         assertThat(publicFestival.body()).contains("Community Supporter");
         assertThat(publicFestival.body()).contains("/images/demo-community-gathering.jpg");
@@ -301,6 +303,7 @@ class AdminFestivalControllerIntegrationTest {
         request.put("year", year);
         request.put("theme", "Administrator-provided theme");
         request.put("description", "Edition description.");
+        request.put("featuredHighlights", "Community meal service\nCultural programme");
         request.put("startDate", "2030-10-10");
         request.put("endDate", "2030-10-12");
         request.put("venue", "Community Hall");

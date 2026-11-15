@@ -18,6 +18,8 @@ public record FestivalEditionRequest(
         String theme,
         @Size(max = 20000, message = "Description must be 20,000 characters or fewer.")
         String description,
+        @Size(max = 10000, message = "Featured highlights must be 10,000 characters or fewer.")
+        String featuredHighlights,
         LocalDate startDate,
         LocalDate endDate,
         @Size(max = 255, message = "Venue must be 255 characters or fewer.")

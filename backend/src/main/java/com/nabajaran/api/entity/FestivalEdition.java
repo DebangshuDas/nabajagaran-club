@@ -48,6 +48,9 @@ public class FestivalEdition extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "featured_highlights", columnDefinition = "TEXT")
+    private String featuredHighlights;
+
     @Column(name = "start_date")
     private LocalDate startDate;
 
@@ -139,6 +142,14 @@ public class FestivalEdition extends BaseEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getFeaturedHighlights() {
+        return featuredHighlights;
+    }
+
+    public void setFeaturedHighlights(String featuredHighlights) {
+        this.featuredHighlights = featuredHighlights;
     }
 
     public LocalDate getStartDate() {

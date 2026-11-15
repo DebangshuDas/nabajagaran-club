@@ -5,6 +5,7 @@ import type {
   ClubDetailsResponse,
   CommunityInitiativeResponse,
   EventResponse,
+  FestivalPublicResponse,
 } from "../types/api";
 
 async function getArrayResponse<T>(endpoint: string): Promise<T[]> {
@@ -36,4 +37,11 @@ export async function getPublishedAnnouncements() {
 
 export async function getApprovedBusinesses() {
   return getArrayResponse<BusinessResponse>("/businesses/approved");
+}
+
+export async function getPublicFestival(slug: string) {
+  const response = await api.get<FestivalPublicResponse>(
+    `/festivals/${encodeURIComponent(slug)}`,
+  );
+  return response.data;
 }
