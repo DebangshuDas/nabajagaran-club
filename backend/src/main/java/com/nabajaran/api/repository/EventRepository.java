@@ -15,6 +15,8 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
 
     Optional<Event> findByIdAndDeletedFalse(Long id);
 
+    List<Event> findAllByIdInAndDeletedFalse(List<Long> ids);
+
     boolean existsBySlug(String slug);
 
     boolean existsBySlugAndIdNot(String slug, Long id);

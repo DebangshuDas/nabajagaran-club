@@ -193,7 +193,8 @@ WHERE EXISTS (SELECT 1 FROM club_information)
 
 INSERT INTO community_initiatives (
     club_information_id, title, description, start_date, end_date, location, contact_email,
-    status, created_at, updated_at, deleted, deleted_at
+    status, created_at, updated_at, deleted, deleted_at, slug, category, short_description,
+    image_url, is_published
 )
 SELECT
     (SELECT id FROM club_information ORDER BY id LIMIT 1),
@@ -203,11 +204,16 @@ SELECT
     NULL,
     'Demo City',
     'hello@example.com',
-    'active',
+    'ACTIVE',
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP,
     FALSE,
-    NULL
+    NULL,
+    'neighborhood-welcome-project',
+    'Community',
+    'A sample initiative to help new neighbors connect.',
+    NULL,
+    FALSE
 WHERE EXISTS (SELECT 1 FROM club_information)
   AND NOT EXISTS (
       SELECT 1 FROM community_initiatives WHERE title = 'Neighborhood Welcome Project'

@@ -20,11 +20,6 @@ export type ClubEvent = {
   to: string;
 };
 
-export type Initiative = {
-  title: string;
-  text: string;
-};
-
 export type BusinessListing = {
   name: string;
   category: string;
@@ -110,25 +105,6 @@ export const events: ClubEvent[] = [
     summary:
       "Sample listing for music, recitation, or theatre. Performers and timing are not confirmed.",
     to: "/events",
-  },
-];
-
-export const initiatives: Initiative[] = [
-  {
-    title: "Learning support",
-    text: "A card ready for tuition circles, book sharing, or exam-season help, once the club describes the work.",
-  },
-  {
-    title: "Health camps",
-    text: "A card ready for check-ups or health awareness sessions. No camp is listed as scheduled.",
-  },
-  {
-    title: "Relief coordination",
-    text: "A card ready for flood, winter, or festival relief. Collection points are not published yet.",
-  },
-  {
-    title: "Neighbourhood care",
-    text: "A card ready for visits, rations, or support for elders. Names and addresses are intentionally absent.",
   },
 ];
 

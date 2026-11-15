@@ -3,6 +3,7 @@ import type {
   AnnouncementResponse,
   BusinessResponse,
   ClubDetailsResponse,
+  CommunityInitiativeResponse,
   EventResponse,
 } from "../types/api";
 
@@ -23,6 +24,10 @@ export async function getClubDetails() {
 
 export async function getUpcomingEvents() {
   return getArrayResponse<EventResponse>("/events/upcoming");
+}
+
+export async function getPublishedInitiatives() {
+  return getArrayResponse<CommunityInitiativeResponse>("/initiatives/published");
 }
 
 export async function getPublishedAnnouncements() {

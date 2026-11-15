@@ -6,6 +6,7 @@ import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 import { AnnouncementsManagementPage } from "./pages/admin/AnnouncementsManagementPage";
 import { ClubProfileManagementPage } from "./pages/admin/ClubProfileManagementPage";
 import { EventsManagementPage } from "./pages/admin/EventsManagementPage";
+import { InitiativesManagementPage } from "./pages/admin/InitiativesManagementPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import DirectoryPage from "./pages/DirectoryPage";
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboardPage />} />
           <Route path="events" element={<EventsManagementPage />} />
+          <Route path="initiatives" element={<InitiativesManagementPage />} />
           <Route path="announcements" element={<AnnouncementsManagementPage />} />
           <Route path="businesses" element={<AdminModulePlaceholder title="Business directory" />} />
           <Route path="membership" element={<AdminModulePlaceholder title="Membership" />} />

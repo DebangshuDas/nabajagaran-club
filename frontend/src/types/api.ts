@@ -73,6 +73,67 @@ export interface EventRequest {
   published: boolean;
 }
 
+export type InitiativeStatus = "PLANNED" | "ACTIVE" | "COMPLETED";
+
+export interface InitiativeEventResponse {
+  id: number;
+  title: string;
+  slug: string;
+  startAt: string;
+  status: EventStatus;
+  published: boolean;
+}
+
+export interface CommunityInitiativeResponse {
+  id: number;
+  title: string;
+  slug: string;
+  category?: string | null;
+  shortDescription?: string | null;
+  description: string;
+  imageUrl?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  location?: string | null;
+  status: InitiativeStatus;
+  published: boolean;
+  relatedEvents: InitiativeEventResponse[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CommunityInitiativeRequest {
+  title: string;
+  slug: string;
+  category: string | null;
+  shortDescription: string | null;
+  description: string;
+  imageUrl: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  location: string | null;
+  status: InitiativeStatus;
+  published: boolean;
+  relatedEventIds: number[];
+}
+
+export interface AdminCommunityInitiativePageResponse {
+  content: CommunityInitiativeResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface AdminCommunityInitiativeQuery {
+  search: string;
+  category: string;
+  status: InitiativeStatus | "";
+  published: boolean | undefined;
+  page: number;
+  size: number;
+}
+
 export interface AdminEventPageResponse {
   content: EventResponse[];
   page: number;

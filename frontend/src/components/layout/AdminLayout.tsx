@@ -7,6 +7,7 @@ import {
   HandHeart,
   Images,
   LayoutDashboard,
+  Sprout,
   LogOut,
   Menu,
   MessageSquareText,
@@ -23,6 +24,7 @@ import { getAdminDashboard } from "../../services/adminService";
 const navigation = [
   { label: "Dashboard", to: "/admin", icon: LayoutDashboard },
   { label: "Events", to: "/admin/events", icon: CalendarDays },
+  { label: "Initiatives", to: "/admin/initiatives", icon: Sprout },
   { label: "Announcements", to: "/admin/announcements", icon: Megaphone },
   { label: "Membership", to: "/admin/membership", icon: Users },
   { label: "Volunteers", to: "/admin/volunteers", icon: HandHeart },
@@ -121,6 +123,7 @@ export function AdminLayout() {
                 }
                 title={
                   to === "/admin" || label === "Announcements" || label === "Club profile"
+                    || label === "Initiatives"
                     ? undefined
                     : "This module is a route placeholder"
                 }
@@ -129,7 +132,8 @@ export function AdminLayout() {
                   <>
                     <Icon size={17} strokeWidth={1.8} />
                     <span className="flex-1">{label}</span>
-                    {to !== "/admin" && label !== "Announcements" && label !== "Club profile" && (
+                    {to !== "/admin" && label !== "Announcements" && label !== "Club profile"
+                      && label !== "Initiatives" && (
                       <span
                         className={`rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${
                           isActive

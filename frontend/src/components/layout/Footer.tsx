@@ -80,7 +80,7 @@ export function Footer({ club }: { club: ClubDetailsResponse | null }) {
       </div>
       <div className="border-t border-ivory/10">
         <p className="mx-auto max-w-6xl px-5 py-5 text-xs text-ivory/60 md:px-8">
-          © {year} {clubName}. Programme text on this site is placeholder copy until the club publishes its own.
+          © {year} {clubName}.
         </p>
       </div>
     </footer>

@@ -1,6 +1,8 @@
 import api from "./api";
 import type {
   AdminDashboardResponse,
+  AdminCommunityInitiativePageResponse,
+  AdminCommunityInitiativeQuery,
   AdminAnnouncementPageResponse,
   AdminAnnouncementQuery,
   AdminEventPageResponse,
@@ -8,6 +10,8 @@ import type {
   AnnouncementCreateRequest,
   AnnouncementResponse,
   AnnouncementUpdateRequest,
+  CommunityInitiativeRequest,
+  CommunityInitiativeResponse,
   ClubDetailsResponse,
   ClubProfileUpdateRequest,
   EventRequest,
@@ -150,6 +154,78 @@ export async function unpublishAdminEvent(authorization: string, id: number) {
 
 export async function deleteAdminEvent(authorization: string, id: number) {
   await api.delete(`/admin/events/${id}`, {
+    headers: { Authorization: authorization },
+  });
+}
+
+export async function getAdminInitiatives(
+  authorization: string,
+  query: AdminCommunityInitiativeQuery,
+) {
+  const response = await api.get<AdminCommunityInitiativePageResponse>("/admin/initiatives", {
+    headers: { Authorization: authorization },
+    params: {
+      search: query.search,
+      category: query.category || undefined,
+      status: query.status || undefined,
+      published: query.published,
+      page: query.page,
+      size: query.size,
+    },
+  });
+  return response.data;
+}
+
+export async function getAdminInitiative(authorization: string, id: number) {
+  const response = await api.get<CommunityInitiativeResponse>(`/admin/initiatives/${id}`, {
+    headers: { Authorization: authorization },
+  });
+  return response.data;
+}
+
+export async function createAdminInitiative(
+  authorization: string,
+  request: CommunityInitiativeRequest,
+) {
+  const response = await api.post<CommunityInitiativeResponse>("/admin/initiatives", request, {
+    headers: { Authorization: authorization },
+  });
+  return response.data;
+}
+
+export async function updateAdminInitiative(
+  authorization: string,
+  id: number,
+  request: CommunityInitiativeRequest,
+) {
+  const response = await api.put<CommunityInitiativeResponse>(
+    `/admin/initiatives/${id}`,
+    request,
+    { headers: { Authorization: authorization } },
+  );
+  return response.data;
+}
+
+export async function publishAdminInitiative(authorization: string, id: number) {
+  const response = await api.patch<CommunityInitiativeResponse>(
+    `/admin/initiatives/${id}/publish`,
+    undefined,
+    { headers: { Authorization: authorization } },
+  );
+  return response.data;
+}
+
+export async function unpublishAdminInitiative(authorization: string, id: number) {
+  const response = await api.patch<CommunityInitiativeResponse>(
+    `/admin/initiatives/${id}/unpublish`,
+    undefined,
+    { headers: { Authorization: authorization } },
+  );
+  return response.data;
+}
+
+export async function deleteAdminInitiative(authorization: string, id: number) {
+  await api.delete(`/admin/initiatives/${id}`, {
     headers: { Authorization: authorization },
   });
 }
