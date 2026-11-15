@@ -82,6 +82,36 @@ export interface AnnouncementResponse {
   updatedAt: string;
 }
 
+export interface AdminAnnouncementPageResponse {
+  content: AnnouncementResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface AdminAnnouncementQuery {
+  search: string;
+  published: boolean | undefined;
+  audience: string;
+  page: number;
+  size: number;
+  sort: "createdAt,desc" | "createdAt,asc" | "publishedAt,desc" | "publishedAt,asc";
+}
+
+export interface AnnouncementCreateRequest {
+  title: string;
+  content: string;
+  audience: string | null;
+  publishImmediately: boolean;
+}
+
+export interface AnnouncementUpdateRequest {
+  title: string;
+  content: string;
+  audience: string | null;
+}
+
 export interface BusinessResponse {
   id: number;
   name: string;

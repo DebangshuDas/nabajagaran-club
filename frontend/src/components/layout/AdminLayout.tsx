@@ -102,13 +102,17 @@ export function AdminLayout() {
                       : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
                   }`
                 }
-                title={to === "/admin" ? undefined : "This module is a route placeholder"}
+                title={
+                  to === "/admin" || label === "Announcements"
+                    ? undefined
+                    : "This module is a route placeholder"
+                }
               >
                 {({ isActive }) => (
                   <>
                     <Icon size={17} strokeWidth={1.8} />
                     <span className="flex-1">{label}</span>
-                    {to !== "/admin" && (
+                    {to !== "/admin" && label !== "Announcements" && (
                       <span
                         className={`rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${
                           isActive

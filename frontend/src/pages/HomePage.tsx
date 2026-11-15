@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import { AnnouncementContent } from "../components/ui/AnnouncementContent";
 import { CtaBand } from "../components/ui/CtaBand";
 import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/ui/ErrorState";
@@ -137,7 +138,10 @@ export default function HomePage() {
                   {announcement.audience ?? "Public"}
                 </p>
                 <h3 className="mt-2 font-display text-3xl text-maroon">{announcement.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted">{announcement.content}</p>
+                <AnnouncementContent
+                  className="mt-3 space-y-2 text-sm leading-relaxed text-muted"
+                  content={announcement.content}
+                />
               </li>
             ))}
           </ul>

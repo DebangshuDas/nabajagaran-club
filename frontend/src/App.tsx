@@ -3,6 +3,7 @@ import { SiteLayout } from "./components/layout/SiteLayout";
 import { AdminLayout } from "./components/layout/AdminLayout";
 import { AdminModulePlaceholder } from "./pages/admin/AdminModulePlaceholder";
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
+import { AnnouncementsManagementPage } from "./pages/admin/AnnouncementsManagementPage";
 import { EventsManagementPage } from "./pages/admin/EventsManagementPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
@@ -23,7 +24,7 @@ export default function App() {
         <Route path="admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboardPage />} />
           <Route path="events" element={<EventsManagementPage />} />
-          <Route path="announcements" element={<AdminModulePlaceholder title="Announcements" />} />
+          <Route path="announcements" element={<AnnouncementsManagementPage />} />
           <Route path="businesses" element={<AdminModulePlaceholder title="Business directory" />} />
           <Route path="membership" element={<AdminModulePlaceholder title="Membership" />} />
           <Route path="volunteers" element={<AdminModulePlaceholder title="Volunteers" />} />

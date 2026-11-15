@@ -1,11 +1,79 @@
 import api from "./api";
 import type {
   AdminDashboardResponse,
+  AdminAnnouncementPageResponse,
+  AdminAnnouncementQuery,
   AdminEventPageResponse,
   AdminEventQuery,
+  AnnouncementCreateRequest,
+  AnnouncementResponse,
+  AnnouncementUpdateRequest,
   EventRequest,
   EventResponse,
 } from "../types/api";
+
+export async function getAnnouncements(
+  authorization: string,
+  query: AdminAnnouncementQuery,
+) {
+  const response = await api.get<AdminAnnouncementPageResponse>("/admin/announcements", {
+    headers: { Authorization: authorization },
+    params: query,
+  });
+  return response.data;
+}
+
+export async function getAnnouncementById(authorization: string, id: number) {
+  const response = await api.get<AnnouncementResponse>(`/admin/announcements/${id}`, {
+    headers: { Authorization: authorization },
+  });
+  return response.data;
+}
+
+export async function createAnnouncement(
+  authorization: string,
+  request: AnnouncementCreateRequest,
+) {
+  const response = await api.post<AnnouncementResponse>("/admin/announcements", request, {
+    headers: { Authorization: authorization },
+  });
+  return response.data;
+}
+
+export async function updateAnnouncement(
+  authorization: string,
+  id: number,
+  request: AnnouncementUpdateRequest,
+) {
+  const response = await api.put<AnnouncementResponse>(`/admin/announcements/${id}`, request, {
+    headers: { Authorization: authorization },
+  });
+  return response.data;
+}
+
+export async function publishAnnouncement(authorization: string, id: number) {
+  const response = await api.patch<AnnouncementResponse>(
+    `/admin/announcements/${id}/publish`,
+    undefined,
+    { headers: { Authorization: authorization } },
+  );
+  return response.data;
+}
+
+export async function unpublishAnnouncement(authorization: string, id: number) {
+  const response = await api.patch<AnnouncementResponse>(
+    `/admin/announcements/${id}/unpublish`,
+    undefined,
+    { headers: { Authorization: authorization } },
+  );
+  return response.data;
+}
+
+export async function deleteAnnouncement(authorization: string, id: number) {
+  await api.delete(`/admin/announcements/${id}`, {
+    headers: { Authorization: authorization },
+  });
+}
 
 export async function getAdminDashboard(authorization: string) {
   const response = await api.get<AdminDashboardResponse>("/admin/dashboard", {
