@@ -219,3 +219,110 @@ export interface AdminDashboardResponse {
   events: EventResponse[];
   announcements: AnnouncementResponse[];
 }
+
+export interface FestivalResponse {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
+  history?: string | null;
+  coverImageUrl?: string | null;
+  published: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FestivalRequest {
+  name: string;
+  slug: string;
+  description: string | null;
+  history: string | null;
+  coverImageUrl: string | null;
+  published: boolean;
+}
+
+export interface FestivalEditionResponse {
+  id: number;
+  festivalId: number;
+  festivalName: string;
+  year: number;
+  theme?: string | null;
+  description?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  venue?: string | null;
+  address?: string | null;
+  published: boolean;
+  events: FestivalAssociationOptionResponse[];
+  galleryImages: FestivalAssociationOptionResponse[];
+  sponsors: FestivalAssociationOptionResponse[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FestivalEditionRequest {
+  year: number;
+  theme: string | null;
+  description: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  venue: string | null;
+  address: string | null;
+  published: boolean;
+  eventIds: number[];
+  galleryImageIds: number[];
+  sponsorIds: number[];
+}
+
+export interface FestivalAssociationOptionResponse {
+  id: number;
+  label: string;
+  detail?: string | null;
+  imageUrl?: string | null;
+  startAt?: string | null;
+  status: string;
+  available: boolean;
+}
+
+export type FestivalAssociationType = "EVENT" | "GALLERY_IMAGE" | "SPONSOR";
+
+export interface AdminFestivalPageResponse {
+  content: FestivalResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface AdminFestivalEditionPageResponse {
+  content: FestivalEditionResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface AdminFestivalAssociationPageResponse {
+  content: FestivalAssociationOptionResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface AdminFestivalQuery {
+  search: string;
+  published: boolean | undefined;
+  page: number;
+  size: number;
+}
+
+export interface FestivalPublicResponse {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
+  history?: string | null;
+  coverImageUrl?: string | null;
+  editions: FestivalEditionResponse[];
+}

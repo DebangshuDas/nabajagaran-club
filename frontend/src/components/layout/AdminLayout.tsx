@@ -4,6 +4,7 @@ import {
   BadgeCheck,
   Building2,
   CalendarDays,
+  Church,
   HandHeart,
   Images,
   LayoutDashboard,
@@ -25,6 +26,7 @@ const navigation = [
   { label: "Dashboard", to: "/admin", icon: LayoutDashboard },
   { label: "Events", to: "/admin/events", icon: CalendarDays },
   { label: "Initiatives", to: "/admin/initiatives", icon: Sprout },
+  { label: "Festivals", to: "/admin/festivals", icon: Church },
   { label: "Announcements", to: "/admin/announcements", icon: Megaphone },
   { label: "Membership", to: "/admin/membership", icon: Users },
   { label: "Volunteers", to: "/admin/volunteers", icon: HandHeart },
@@ -123,7 +125,7 @@ export function AdminLayout() {
                 }
                 title={
                   to === "/admin" || label === "Announcements" || label === "Club profile"
-                    || label === "Initiatives"
+                    || label === "Initiatives" || label === "Festivals"
                     ? undefined
                     : "This module is a route placeholder"
                 }
@@ -133,7 +135,7 @@ export function AdminLayout() {
                     <Icon size={17} strokeWidth={1.8} />
                     <span className="flex-1">{label}</span>
                     {to !== "/admin" && label !== "Announcements" && label !== "Club profile"
-                      && label !== "Initiatives" && (
+                      && label !== "Initiatives" && label !== "Festivals" && (
                       <span
                         className={`rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${
                           isActive
