@@ -305,16 +305,10 @@ export function FestivalsManagementPage() {
         title="Festival management"
         description="Manage reusable festival profiles and their annual editions."
         actions={
-          <>
-            <Link className={buttonClass} to="/admin/festivals/durga-puja">
-              <CalendarDays size={16} />
-              Manage Durga Puja
-            </Link>
-            <Link className={primaryButtonClass} to="/admin/festivals/new">
-              <Plus size={16} />
-              Create festival
-            </Link>
-          </>
+          <Link className={primaryButtonClass} to="/admin/festivals/new">
+            <Plus size={16} />
+            Create festival
+          </Link>
         }
       />
       {toast && (
@@ -396,12 +390,6 @@ const emptyFestivalForm: FestivalForm = {
   published: false,
 };
 
-const initialDurgaPujaForm: FestivalForm = {
-  ...emptyFestivalForm,
-  name: "Durga Puja",
-  slug: "durga-puja",
-};
-
 function toFestivalForm(festival: FestivalResponse): FestivalForm {
   return {
     name: festival.name,
@@ -424,22 +412,32 @@ function festivalRequest(form: FestivalForm): FestivalRequest {
   };
 }
 
+function festivalNameFromSlug(slug: string): string {
+  return slug
+    .split("-")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 export function FestivalEditorPage() {
   const { authorization, onLogout, onUnsavedChangesChange } =
     useOutletContext<AdminOutletContext>();
   const { festivalId = "" } = useParams();
   const navigate = useNavigate();
   const isNewRoute = festivalId === "new";
-  const isDurgaSlugRoute = festivalId === "durga-puja";
+  const isNumericRoute = /^\d+$/.test(festivalId);
+  const isSlugRoute =
+    !isNewRoute && !isNumericRoute && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(festivalId);
   const numericId = Number(festivalId);
   const invalidFestivalId =
     !isNewRoute
-    && !isDurgaSlugRoute
+    && !isSlugRoute
     && (!Number.isSafeInteger(numericId) || numericId <= 0);
   const [resolvedFestivalId, setResolvedFestivalId] = useState<number | null>(
-    isDurgaSlugRoute || isNewRoute ? null : numericId,
+    isSlugRoute || isNewRoute ? null : numericId,
   );
-  const [isMissingDurgaProfile, setIsMissingDurgaProfile] = useState(false);
+  const [isMissingSlugProfile, setIsMissingSlugProfile] = useState(false);
   const [form, setForm] = useState<FestivalForm>(emptyFestivalForm);
   const [initialForm, setInitialForm] = useState<FestivalForm>(emptyFestivalForm);
   const [isLoading, setIsLoading] = useState(!isNewRoute);
@@ -447,25 +445,29 @@ export function FestivalEditorPage() {
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<Toast | null>(null);
   const [savedFestival, setSavedFestival] = useState<FestivalResponse | null>(null);
-  const isNew = isNewRoute || (isDurgaSlugRoute && isMissingDurgaProfile);
+  const isNew = isNewRoute || (isSlugRoute && isMissingSlugProfile);
   const dirty = JSON.stringify(form) !== JSON.stringify(initialForm);
 
   useEffect(() => {
     if (isNewRoute || invalidFestivalId) return;
     let active = true;
-    const festivalPromise = isDurgaSlugRoute
+    const festivalPromise = isSlugRoute
       ? getAdminFestivals(authorization, {
-          search: "durga-puja",
+          search: festivalId,
           published: undefined,
           page: 0,
           size: 100,
         }).then((response) => {
-          const festival = response.content.find((item) => item.slug === "durga-puja");
+          const festival = response.content.find((item) => item.slug === festivalId);
           if (!festival) {
             if (active) {
               setResolvedFestivalId(null);
-              setIsMissingDurgaProfile(true);
-              setForm(initialDurgaPujaForm);
+              setIsMissingSlugProfile(true);
+              setForm({
+                ...emptyFestivalForm,
+                name: festivalNameFromSlug(festivalId),
+                slug: festivalId,
+              });
               setInitialForm(emptyFestivalForm);
             }
             return null;
@@ -478,7 +480,7 @@ export function FestivalEditorPage() {
         if (!active || !festival) return;
         const nextForm = toFestivalForm(festival);
         setResolvedFestivalId(festival.id);
-        setIsMissingDurgaProfile(false);
+        setIsMissingSlugProfile(false);
         setForm(nextForm);
         setInitialForm(nextForm);
         setSavedFestival(festival);
@@ -492,7 +494,7 @@ export function FestivalEditorPage() {
     return () => {
       active = false;
     };
-  }, [authorization, festivalId, invalidFestivalId, isDurgaSlugRoute, isNewRoute, numericId, onLogout]);
+  }, [authorization, festivalId, invalidFestivalId, isNewRoute, isSlugRoute, numericId, onLogout]);
 
   useEffect(() => {
     onUnsavedChangesChange(dirty);
@@ -527,7 +529,7 @@ export function FestivalEditorPage() {
         : await updateAdminFestival(authorization, resolvedFestivalId ?? numericId, request);
       const nextForm = toFestivalForm(festival);
       setResolvedFestivalId(festival.id);
-      setIsMissingDurgaProfile(false);
+      setIsMissingSlugProfile(false);
       setForm(nextForm);
       setInitialForm(nextForm);
       setSavedFestival(festival);
@@ -563,15 +565,15 @@ export function FestivalEditorPage() {
       <BackLink hasUnsavedChanges={dirty} to="/admin/festivals">Festival profiles</BackLink>
       <AdminPageHeader
         title={
-          isDurgaSlugRoute
-            ? "Manage Durga Puja"
+          isSlugRoute
+            ? `Manage ${savedFestival?.name ?? festivalNameFromSlug(festivalId)}`
             : isNew
               ? "Create festival"
               : `Edit ${savedFestival?.name ?? "festival"}`
         }
         description={
-          isDurgaSlugRoute
-            ? "Manage the Durga Puja profile and its annual editions using the shared festival system."
+          isSlugRoute
+            ? "Manage this festival profile and its annual editions using the shared festival system."
             : "Festival profiles are reusable across all annual editions."
         }
         actions={

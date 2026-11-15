@@ -266,6 +266,90 @@ class AdminFestivalControllerIntegrationTest {
         assertThat(send("/api/v1/festivals/published").body()).doesNotContain(slug);
     }
 
+    @Test
+    void shouldKeepDurgaAndKaliProfilesAndEditionsIndependent() throws Exception {
+        String suffix = UUID.randomUUID().toString();
+        String durgaSlug = "durga-puja-" + suffix;
+        String kaliSlug = "kali-puja-" + suffix;
+        HttpResponse<String> durgaCreated = createFestival("Durga profile " + suffix, durgaSlug, false);
+        HttpResponse<String> kaliCreated = createFestival("Kali profile " + suffix, kaliSlug, false);
+        assertThat(durgaCreated.statusCode()).isEqualTo(201);
+        assertThat(kaliCreated.statusCode()).isEqualTo(201);
+        long durgaId = jsonLong(durgaCreated.body(), "id");
+        long kaliId = jsonLong(kaliCreated.body(), "id");
+
+        Map<String, Object> durgaUpdate = festivalRequest("Updated Durga profile " + suffix, durgaSlug, true);
+        durgaUpdate.put("description", "Durga profile description " + suffix);
+        HttpResponse<String> durgaUpdated = send(
+                "PUT", "/api/v1/admin/festivals/" + durgaId, toJson(durgaUpdate), true);
+        assertThat(durgaUpdated.statusCode()).isEqualTo(200);
+        assertThat(send("GET", "/api/v1/admin/festivals/" + kaliId, null, true).body())
+                .contains("Kali profile " + suffix)
+                .doesNotContain("Updated Durga profile " + suffix);
+        Map<String, Object> kaliUpdate = festivalRequest("Updated Kali profile " + suffix, kaliSlug, false);
+        kaliUpdate.put("description", "Kali profile description " + suffix);
+        assertThat(send("PUT", "/api/v1/admin/festivals/" + kaliId, toJson(kaliUpdate), true).statusCode())
+                .isEqualTo(200);
+        assertThat(send("GET", "/api/v1/admin/festivals/" + durgaId, null, true).body())
+                .contains("Updated Durga profile " + suffix)
+                .doesNotContain("Updated Kali profile " + suffix);
+
+        Map<String, Object> durgaEditionRequest =
+                editionRequest(2032, false, List.of(), List.of(), List.of());
+        durgaEditionRequest.put("theme", "Durga edition theme " + suffix);
+        long galleryImageId = jdbcTemplate.queryForObject(
+                "SELECT id FROM gallery_images WHERE image_url = ?",
+                Long.class,
+                "/images/demo-community-gathering.jpg");
+        long sponsorId = jdbcTemplate.queryForObject(
+                "SELECT id FROM sponsors WHERE slug = ?",
+                Long.class,
+                "demo-community-supporter");
+        Map<String, Object> kaliEditionRequest =
+                editionRequest(2033, false, List.of(), List.of(galleryImageId), List.of(sponsorId));
+        kaliEditionRequest.put("theme", "Kali edition theme " + suffix);
+        HttpResponse<String> durgaEdition = createEdition(durgaId, durgaEditionRequest);
+        HttpResponse<String> kaliEdition = createEdition(kaliId, kaliEditionRequest);
+        assertThat(durgaEdition.statusCode()).isEqualTo(201);
+        assertThat(kaliEdition.statusCode()).isEqualTo(201);
+        long durgaEditionId = jsonLong(durgaEdition.body(), "id");
+        long kaliEditionId = jsonLong(kaliEdition.body(), "id");
+
+        assertThat(send(
+                "PATCH",
+                "/api/v1/admin/festivals/" + durgaId + "/editions/" + durgaEditionId + "/publish",
+                null,
+                true).statusCode()).isEqualTo(200);
+        HttpResponse<String> publicDurga = send("/api/v1/festivals/" + durgaSlug);
+        assertThat(publicDurga.statusCode()).isEqualTo(200);
+        assertThat(publicDurga.body())
+                .contains("Updated Durga profile " + suffix, "Durga edition theme " + suffix, "\"year\":2032")
+                .doesNotContain("Kali profile " + suffix, "Kali edition theme " + suffix, "\"year\":2033");
+        assertThat(send("/api/v1/festivals/" + kaliSlug).statusCode()).isEqualTo(404);
+
+        assertThat(send(
+                "PATCH",
+                "/api/v1/admin/festivals/" + kaliId + "/publish",
+                null,
+                true).statusCode()).isEqualTo(200);
+        assertThat(send(
+                "PATCH",
+                "/api/v1/admin/festivals/" + kaliId + "/editions/" + kaliEditionId + "/publish",
+                null,
+                true).statusCode()).isEqualTo(200);
+        HttpResponse<String> publicKali = send("/api/v1/festivals/" + kaliSlug);
+        assertThat(publicKali.statusCode()).isEqualTo(200);
+        assertThat(publicKali.body())
+                .contains("Updated Kali profile " + suffix, "Kali edition theme " + suffix, "\"year\":2033")
+                .contains("Community Supporter", "/images/demo-community-gathering.jpg")
+                .doesNotContain("Updated Durga profile " + suffix, "Durga edition theme " + suffix, "\"year\":2032");
+        HttpResponse<String> publicDurgaAfterKaliUpdate = send("/api/v1/festivals/" + durgaSlug);
+        assertThat(publicDurgaAfterKaliUpdate.body())
+                .contains("Updated Durga profile " + suffix, "Durga edition theme " + suffix, "\"year\":2032")
+                .doesNotContain("Updated Kali profile " + suffix, "Kali edition theme " + suffix, "\"year\":2033")
+                .doesNotContain("Community Supporter", "/images/demo-community-gathering.jpg");
+    }
+
     private HttpResponse<String> createFestival(String name, String slug, boolean published) throws Exception {
         return send(
                 "POST",
