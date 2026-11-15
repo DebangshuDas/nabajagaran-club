@@ -2,6 +2,7 @@ import axios from "axios";
 import {
   ArrowLeft,
   CalendarDays,
+  ListOrdered,
   Pencil,
   Plus,
   Send,
@@ -578,21 +579,39 @@ export function FestivalEditorPage() {
         }
         actions={
           savedFestival && (
-            <Link
-              className={buttonClass}
-              onClick={(event) => {
-                if (
-                  dirty
-                  && !window.confirm("Leave this page and discard unsaved changes?")
-                ) {
-                  event.preventDefault();
-                }
-              }}
-              to={`/admin/festivals/${savedFestival.id}/editions`}
-            >
-              <CalendarDays size={16} />
-              Manage editions
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              {savedFestival.published && (
+                <Link
+                  className={buttonClass}
+                  onClick={(event) => {
+                    if (
+                      dirty
+                      && !window.confirm("Leave this page and discard unsaved changes?")
+                    ) {
+                      event.preventDefault();
+                    }
+                  }}
+                  to={`/festivals/${savedFestival.slug}`}
+                >
+                  View public page
+                </Link>
+              )}
+              <Link
+                className={buttonClass}
+                onClick={(event) => {
+                  if (
+                    dirty
+                    && !window.confirm("Leave this page and discard unsaved changes?")
+                  ) {
+                    event.preventDefault();
+                  }
+                }}
+                to={`/admin/festivals/${savedFestival.id}/editions`}
+              >
+                <CalendarDays size={16} />
+                Manage editions
+              </Link>
+            </div>
           )
         }
       />
@@ -766,6 +785,13 @@ export function FestivalEditionsPage() {
         className: "whitespace-nowrap",
         render: (edition) => (
           <div className="flex items-center gap-1">
+            <Link
+              aria-label={`Manage ${edition.year} programmes`}
+              className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-[#7b1e2b]"
+              to={`/admin/festivals/${numericId}/editions/${edition.id}/programmes`}
+            >
+              <ListOrdered size={16} />
+            </Link>
             <Link
               aria-label={`Edit ${edition.year} edition`}
               className="rounded-md p-2 text-slate-500 hover:bg-slate-100 hover:text-[#7b1e2b]"

@@ -38,6 +38,7 @@ export const navItems: NavItem[] = [
   { label: "Home", to: "/" },
   { label: "About", to: "/about" },
   { label: "Events", to: "/events" },
+  { label: "Festivals", to: "/festivals" },
   { label: "Durga Puja", to: "/durga-puja" },
   { label: "Kali Puja", to: "/kali-puja" },
   { label: "Initiatives", to: "/initiatives" },

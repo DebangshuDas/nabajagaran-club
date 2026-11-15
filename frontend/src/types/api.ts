@@ -257,8 +257,41 @@ export interface FestivalEditionResponse {
   events: FestivalAssociationOptionResponse[];
   galleryImages: FestivalAssociationOptionResponse[];
   sponsors: FestivalAssociationOptionResponse[];
+  programmes: FestivalProgrammeResponse[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface FestivalProgrammeResponse {
+  id: number;
+  festivalEditionId: number;
+  festivalYear: number;
+  title: string;
+  description?: string | null;
+  programmeDate: string;
+  startTime: string;
+  endTime?: string | null;
+  venue?: string | null;
+  displayOrder: number;
+  published: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FestivalProgrammeRequest {
+  title: string;
+  description: string | null;
+  programmeDate: string;
+  startTime: string;
+  endTime: string | null;
+  venue: string | null;
+  displayOrder: number;
+  published: boolean;
+}
+
+export interface FestivalProgrammeReorderRequest {
+  programmeDate: string;
+  programmeIds: number[];
 }
 
 export interface FestivalEditionRequest {
@@ -327,4 +360,22 @@ export interface FestivalPublicResponse {
   history?: string | null;
   coverImageUrl?: string | null;
   editions: FestivalEditionResponse[];
+}
+
+export interface FestivalPublicEditionSummaryResponse {
+  id: number;
+  year: number;
+  theme?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  venue?: string | null;
+}
+
+export interface FestivalPublicSummaryResponse {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
+  coverImageUrl?: string | null;
+  latestEdition?: FestivalPublicEditionSummaryResponse | null;
 }

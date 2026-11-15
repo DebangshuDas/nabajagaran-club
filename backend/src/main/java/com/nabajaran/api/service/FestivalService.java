@@ -1,10 +1,13 @@
 package com.nabajaran.api.service;
 
 import com.nabajaran.api.dto.AdminFestivalPageResponse;
+import com.nabajaran.api.dto.FestivalPublicEditionSummaryResponse;
 import com.nabajaran.api.dto.FestivalPublicResponse;
+import com.nabajaran.api.dto.FestivalPublicSummaryResponse;
 import com.nabajaran.api.dto.FestivalRequest;
 import com.nabajaran.api.dto.FestivalResponse;
 import com.nabajaran.api.entity.Festival;
+import com.nabajaran.api.entity.FestivalEdition;
 import com.nabajaran.api.exception.ConflictException;
 import com.nabajaran.api.exception.ResourceNotFoundException;
 import com.nabajaran.api.repository.FestivalEditionRepository;
@@ -13,8 +16,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -79,6 +84,42 @@ public class FestivalService {
         return festivalRepository.findByPublishedTrueAndDeletedFalseOrderByNameAsc()
                 .stream()
                 .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<FestivalPublicSummaryResponse> getPublicFestivalSummaries() {
+        List<Festival> festivals = festivalRepository.findByPublishedTrueAndDeletedFalseOrderByNameAsc();
+        if (festivals.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> festivalIds = festivals.stream().map(Festival::getId).toList();
+        Map<Long, FestivalEdition> latestEditions = new HashMap<>();
+        for (FestivalEdition edition : editionRepository.findPublishedSummariesByFestivalIds(festivalIds)) {
+            latestEditions.putIfAbsent(edition.getFestival().getId(), edition);
+        }
+
+        return festivals.stream()
+                .map(festival -> {
+                    FestivalEdition latestEdition = latestEditions.get(festival.getId());
+                    FestivalPublicEditionSummaryResponse editionSummary = latestEdition == null
+                            ? null
+                            : new FestivalPublicEditionSummaryResponse(
+                                    latestEdition.getId(),
+                                    latestEdition.getYear(),
+                                    latestEdition.getTheme(),
+                                    latestEdition.getStartDate(),
+                                    latestEdition.getEndDate(),
+                                    latestEdition.getVenue());
+                    return new FestivalPublicSummaryResponse(
+                            festival.getId(),
+                            festival.getName(),
+                            festival.getSlug(),
+                            festival.getDescription(),
+                            festival.getCoverImageUrl(),
+                            editionSummary);
+                })
                 .toList();
     }
 

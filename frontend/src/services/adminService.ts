@@ -23,7 +23,9 @@ import type {
   FestivalAssociationType,
   FestivalEditionRequest,
   FestivalEditionResponse,
-  FestivalPublicResponse,
+  FestivalProgrammeRequest,
+  FestivalProgrammeResponse,
+  FestivalProgrammeReorderRequest,
   FestivalRequest,
   FestivalResponse,
 } from "../types/api";
@@ -397,12 +399,111 @@ export async function getAdminFestivalAssociationOptions(
   return response.data;
 }
 
-export async function getPublishedFestivals() {
-  const response = await api.get<FestivalPublicResponse[]>("/festivals/published");
+export async function getAdminFestivalProgrammes(
+  authorization: string,
+  festivalId: number,
+  editionId: number,
+  date?: string,
+) {
+  const response = await api.get<FestivalProgrammeResponse[]>(
+    `/admin/festivals/${festivalId}/editions/${editionId}/programmes`,
+    { headers: { Authorization: authorization }, params: { date } },
+  );
   return response.data;
 }
 
-export async function getPublicFestival(slug: string) {
-  const response = await api.get<FestivalPublicResponse>(`/festivals/${encodeURIComponent(slug)}`);
+export async function getAdminFestivalProgramme(
+  authorization: string,
+  festivalId: number,
+  editionId: number,
+  programmeId: number,
+) {
+  const response = await api.get<FestivalProgrammeResponse>(
+    `/admin/festivals/${festivalId}/editions/${editionId}/programmes/${programmeId}`,
+    { headers: { Authorization: authorization } },
+  );
   return response.data;
+}
+
+export async function createAdminFestivalProgramme(
+  authorization: string,
+  festivalId: number,
+  editionId: number,
+  request: FestivalProgrammeRequest,
+) {
+  const response = await api.post<FestivalProgrammeResponse>(
+    `/admin/festivals/${festivalId}/editions/${editionId}/programmes`,
+    request,
+    { headers: { Authorization: authorization } },
+  );
+  return response.data;
+}
+
+export async function updateAdminFestivalProgramme(
+  authorization: string,
+  festivalId: number,
+  editionId: number,
+  programmeId: number,
+  request: FestivalProgrammeRequest,
+) {
+  const response = await api.put<FestivalProgrammeResponse>(
+    `/admin/festivals/${festivalId}/editions/${editionId}/programmes/${programmeId}`,
+    request,
+    { headers: { Authorization: authorization } },
+  );
+  return response.data;
+}
+
+export async function reorderAdminFestivalProgrammes(
+  authorization: string,
+  festivalId: number,
+  editionId: number,
+  request: FestivalProgrammeReorderRequest,
+) {
+  const response = await api.put<FestivalProgrammeResponse[]>(
+    `/admin/festivals/${festivalId}/editions/${editionId}/programmes/order`,
+    request,
+    { headers: { Authorization: authorization } },
+  );
+  return response.data;
+}
+
+export async function publishAdminFestivalProgramme(
+  authorization: string,
+  festivalId: number,
+  editionId: number,
+  programmeId: number,
+) {
+  const response = await api.patch<FestivalProgrammeResponse>(
+    `/admin/festivals/${festivalId}/editions/${editionId}/programmes/${programmeId}/publish`,
+    undefined,
+    { headers: { Authorization: authorization } },
+  );
+  return response.data;
+}
+
+export async function unpublishAdminFestivalProgramme(
+  authorization: string,
+  festivalId: number,
+  editionId: number,
+  programmeId: number,
+) {
+  const response = await api.patch<FestivalProgrammeResponse>(
+    `/admin/festivals/${festivalId}/editions/${editionId}/programmes/${programmeId}/unpublish`,
+    undefined,
+    { headers: { Authorization: authorization } },
+  );
+  return response.data;
+}
+
+export async function deleteAdminFestivalProgramme(
+  authorization: string,
+  festivalId: number,
+  editionId: number,
+  programmeId: number,
+) {
+  await api.delete(
+    `/admin/festivals/${festivalId}/editions/${editionId}/programmes/${programmeId}`,
+    { headers: { Authorization: authorization } },
+  );
 }

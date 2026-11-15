@@ -1,6 +1,7 @@
 package com.nabajaran.api.controller;
 
 import com.nabajaran.api.dto.FestivalPublicResponse;
+import com.nabajaran.api.dto.FestivalPublicSummaryResponse;
 import com.nabajaran.api.dto.FestivalResponse;
 import com.nabajaran.api.service.FestivalService;
 import java.util.List;
@@ -18,6 +19,11 @@ public class FestivalController {
 
     public FestivalController(FestivalService festivalService) {
         this.festivalService = festivalService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<FestivalPublicSummaryResponse>> getFestivalSummaries() {
+        return ResponseEntity.ok(festivalService.getPublicFestivalSummaries());
     }
 
     @GetMapping("/published")

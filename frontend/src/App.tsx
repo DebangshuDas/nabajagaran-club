@@ -7,6 +7,10 @@ import { AnnouncementsManagementPage } from "./pages/admin/AnnouncementsManageme
 import { ClubProfileManagementPage } from "./pages/admin/ClubProfileManagementPage";
 import { EventsManagementPage } from "./pages/admin/EventsManagementPage";
 import {
+  FestivalProgrammeEditorPage,
+  FestivalProgrammesPage,
+} from "./pages/admin/FestivalProgrammesManagementPage";
+import {
   FestivalEditionsPage,
   FestivalEditionEditorPage,
   FestivalEditorPage,
@@ -18,6 +22,8 @@ import ContactPage from "./pages/ContactPage";
 import DirectoryPage from "./pages/DirectoryPage";
 import DurgaPujaPage from "./pages/DurgaPujaPage";
 import EventsPage from "./pages/EventsPage";
+import FestivalDetailPage from "./pages/FestivalDetailPage";
+import FestivalsPage from "./pages/FestivalsPage";
 import GalleryPage from "./pages/GalleryPage";
 import HomePage from "./pages/HomePage";
 import InitiativesPage from "./pages/InitiativesPage";
@@ -40,6 +46,14 @@ export default function App() {
             path="festivals/:festivalId/editions/:editionId"
             element={<FestivalEditionEditorPage />}
           />
+          <Route
+            path="festivals/:festivalId/editions/:editionId/programmes"
+            element={<FestivalProgrammesPage />}
+          />
+          <Route
+            path="festivals/:festivalId/editions/:editionId/programmes/:programmeId"
+            element={<FestivalProgrammeEditorPage />}
+          />
           <Route path="announcements" element={<AnnouncementsManagementPage />} />
           <Route path="businesses" element={<AdminModulePlaceholder title="Business directory" />} />
           <Route path="membership" element={<AdminModulePlaceholder title="Membership" />} />
@@ -55,6 +69,8 @@ export default function App() {
           <Route path="events" element={<EventsPage />} />
           <Route path="durga-puja" element={<DurgaPujaPage />} />
           <Route path="kali-puja" element={<KaliPujaPage />} />
+          <Route path="festivals" element={<FestivalsPage />} />
+          <Route path="festivals/:slug" element={<FestivalDetailPage />} />
           <Route path="initiatives" element={<InitiativesPage />} />
           <Route path="directory" element={<DirectoryPage />} />
           <Route path="gallery" element={<GalleryPage />} />

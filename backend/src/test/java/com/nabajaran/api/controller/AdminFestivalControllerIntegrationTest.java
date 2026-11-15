@@ -350,6 +350,185 @@ class AdminFestivalControllerIntegrationTest {
                 .doesNotContain("Community Supporter", "/images/demo-community-gathering.jpg");
     }
 
+    @Test
+    void shouldManageFilterOrderPublishAndIsolateFestivalProgrammes() throws Exception {
+        assertThat(send(
+                "GET",
+                "/api/v1/admin/festivals/1/editions/1/programmes",
+                null,
+                false).statusCode()).isEqualTo(401);
+        assertThat(send(
+                "POST",
+                "/api/v1/admin/festivals/1/editions/1/programmes",
+                "{}",
+                false).statusCode()).isEqualTo(401);
+
+        String suffix = UUID.randomUUID().toString();
+        String festivalSlug = "programme-festival-" + suffix;
+        long festivalId = jsonLong(createFestival("Programme festival " + suffix, festivalSlug, false).body(), "id");
+        Map<String, Object> editionBody = editionRequest(2034, false, List.of(), List.of(), List.of());
+        editionBody.put("startDate", "2034-10-10");
+        editionBody.put("endDate", "2034-10-12");
+        long editionId = jsonLong(createEdition(festivalId, editionBody).body(), "id");
+        String programmePath = "/api/v1/admin/festivals/" + festivalId
+                + "/editions/" + editionId + "/programmes";
+
+        Map<String, Object> overnightProgramme = programmeRequest(
+                "Late ceremony", "2034-10-10", "20:00", "00:30", 0, false);
+        HttpResponse<String> overnightCreated = send(
+                "POST", programmePath, toJson(overnightProgramme), true);
+        assertThat(overnightCreated.statusCode()).isEqualTo(201);
+        long overnightId = jsonLong(overnightCreated.body(), "id");
+
+        Map<String, Object> openingProgramme = programmeRequest(
+                "Opening programme", "2034-10-10", "17:00", "17:30", 1, false);
+        long openingId = jsonLong(send(
+                "POST", programmePath, toJson(openingProgramme), true).body(), "id");
+        Map<String, Object> secondDayProgramme = programmeRequest(
+                "Second day programme", "2034-10-11", "10:00", "11:00", 0, true);
+        long secondDayId = jsonLong(send(
+                "POST", programmePath, toJson(secondDayProgramme), true).body(), "id");
+
+        Map<String, Object> invalidProgramme = programmeRequest(
+                " ", "2034-10-10", "17:00", null, 0, false);
+        HttpResponse<String> invalidResponse = send(
+                "POST", programmePath, toJson(invalidProgramme), true);
+        assertThat(invalidResponse.statusCode()).isEqualTo(400);
+        assertThat(invalidResponse.body()).contains("Programme title is required.");
+        invalidProgramme = programmeRequest("Invalid order", "2034-10-10", "17:00", null, -1, false);
+        assertThat(send("POST", programmePath, toJson(invalidProgramme), true).statusCode()).isEqualTo(400);
+
+        HttpResponse<String> filtered = send("GET", programmePath + "?date=2034-10-10", null, true);
+        assertThat(filtered.statusCode()).isEqualTo(200);
+        assertThat(filtered.body()).contains("Late ceremony", "Opening programme")
+                .doesNotContain("Second day programme");
+        assertThat(filtered.body().indexOf("Late ceremony"))
+                .isLessThan(filtered.body().indexOf("Opening programme"));
+        HttpResponse<String> allProgrammes = send("GET", programmePath, null, true);
+        assertThat(allProgrammes.body()).contains(
+                "Late ceremony", "Opening programme", "Second day programme");
+
+        HttpResponse<String> reordered = send(
+                "PUT",
+                programmePath + "/order",
+                toJson(Map.of(
+                        "programmeDate", "2034-10-10",
+                        "programmeIds", List.of(openingId, overnightId))),
+                true);
+        assertThat(reordered.statusCode()).isEqualTo(200);
+        assertThat(jsonString(reordered.body(), "title")).isEqualTo("Opening programme");
+        assertThat(jsonLong(reordered.body(), "displayOrder")).isEqualTo(0);
+
+        Map<String, Object> openingUpdate = programmeRequest(
+                "Updated opening programme", "2034-10-10", "17:15", "17:45", 0, false);
+        HttpResponse<String> updated = send(
+                "PUT",
+                programmePath + "/" + openingId,
+                toJson(openingUpdate),
+                true);
+        assertThat(updated.statusCode()).isEqualTo(200);
+        assertThat(jsonLong(updated.body(), "id")).isEqualTo(openingId);
+
+        assertThat(send("PATCH", "/api/v1/admin/festivals/" + festivalId + "/publish", null, true)
+                .statusCode()).isEqualTo(200);
+        assertThat(send(
+                "PATCH",
+                "/api/v1/admin/festivals/" + festivalId + "/editions/" + editionId + "/publish",
+                null,
+                true).statusCode()).isEqualTo(200);
+        HttpResponse<String> publicBeforeProgrammePublish = send("/api/v1/festivals/" + festivalSlug);
+        assertThat(publicBeforeProgrammePublish.statusCode()).isEqualTo(200);
+        assertThat(publicBeforeProgrammePublish.body())
+                .contains("Second day programme")
+                .doesNotContain("Late ceremony", "Opening programme");
+
+        assertThat(send(
+                "PATCH",
+                programmePath + "/" + openingId + "/publish",
+                null,
+                true).statusCode()).isEqualTo(200);
+        HttpResponse<String> publicWithPublishedProgramme = send("/api/v1/festivals/" + festivalSlug);
+        assertThat(publicWithPublishedProgramme.body())
+                .contains("Updated opening programme", "\"programmeDate\":\"2034-10-10\"")
+                .doesNotContain("Late ceremony");
+        assertThat(send(
+                "PATCH",
+                programmePath + "/" + secondDayId + "/unpublish",
+                null,
+                true).statusCode()).isEqualTo(200);
+        assertThat(send("/api/v1/festivals/" + festivalSlug).body())
+                .doesNotContain("Second day programme");
+
+        assertThat(send("DELETE", programmePath + "/" + openingId, null, true).statusCode()).isEqualTo(204);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT deleted FROM festival_programmes WHERE id = ?",
+                Boolean.class,
+                openingId)).isTrue();
+        assertThat(send("/api/v1/festivals/" + festivalSlug).body())
+                .doesNotContain("Updated opening programme");
+
+        String otherSlug = "other-programme-festival-" + suffix;
+        long otherFestivalId =
+                jsonLong(createFestival("Other programme festival " + suffix, otherSlug, true).body(), "id");
+        Map<String, Object> otherEditionBody = editionRequest(2034, true, List.of(), List.of(), List.of());
+        otherEditionBody.put("startDate", "2034-10-10");
+        otherEditionBody.put("endDate", "2034-10-12");
+        long otherEditionId = jsonLong(createEdition(otherFestivalId, otherEditionBody).body(), "id");
+        String otherProgrammePath = "/api/v1/admin/festivals/" + otherFestivalId
+                + "/editions/" + otherEditionId + "/programmes";
+        long otherProgrammeId = jsonLong(send(
+                "POST",
+                otherProgrammePath,
+                toJson(programmeRequest("Independent programme", "2034-10-10", "18:00", null, 0, true)),
+                true).body(), "id");
+        assertThat(otherProgrammeId).isPositive();
+        HttpResponse<String> publicOtherFestival = send("/api/v1/festivals/" + otherSlug);
+        assertThat(publicOtherFestival.statusCode()).isEqualTo(200);
+        assertThat(publicOtherFestival.body())
+                .contains("Independent programme")
+                .doesNotContain("Late ceremony", "Updated opening programme", "Second day programme");
+        assertThat(send("/api/v1/festivals/" + festivalSlug).body())
+                .doesNotContain("Independent programme");
+    }
+
+    @Test
+    void shouldListOnlyPublishedFestivalSummariesWithLatestPublishedEdition() throws Exception {
+        String suffix = UUID.randomUUID().toString();
+        String durgaSlug = "durga-puja-listing-" + suffix;
+        String kaliSlug = "kali-puja-listing-" + suffix;
+        String otherSlug = "other-listing-" + suffix;
+        String draftSlug = "draft-listing-" + suffix;
+        String deletedSlug = "deleted-listing-" + suffix;
+
+        long durgaId = jsonLong(createFestival("Durga Puja " + suffix, durgaSlug, true).body(), "id");
+        long kaliId = jsonLong(createFestival("Kali Puja " + suffix, kaliSlug, true).body(), "id");
+        long otherId = jsonLong(createFestival("Other Festival " + suffix, otherSlug, true).body(), "id");
+        createFestival("Draft Festival " + suffix, draftSlug, false);
+        long deletedId = jsonLong(createFestival("Deleted Festival " + suffix, deletedSlug, true).body(), "id");
+
+        createEdition(durgaId, editionRequest(2033, true, List.of(), List.of(), List.of()));
+        createEdition(durgaId, editionRequest(2034, true, List.of(), List.of(), List.of()));
+        createEdition(durgaId, editionRequest(2035, false, List.of(), List.of(), List.of()));
+        createEdition(kaliId, editionRequest(2034, true, List.of(), List.of(), List.of()));
+        assertThat(send("DELETE", "/api/v1/admin/festivals/" + deletedId, null, true).statusCode())
+                .isEqualTo(204);
+
+        HttpResponse<String> listing = send("/api/v1/festivals");
+        assertThat(listing.statusCode()).isEqualTo(200);
+        assertThat(listing.body())
+                .contains(durgaSlug, kaliSlug, otherSlug)
+                .doesNotContain(draftSlug, deletedSlug, "\"history\"", "\"updatedAt\"", "\"published\"");
+        assertThat(listing.body().indexOf("Durga Puja " + suffix))
+                .isLessThan(listing.body().indexOf("Kali Puja " + suffix));
+        assertThat(jsonLong(listing.body(), "year")).isEqualTo(2034);
+        assertThat(listing.body())
+                .contains("\"latestEdition\":null")
+                .doesNotContain("\"year\":2035");
+        assertThat(send("/api/v1/festivals/" + durgaSlug).statusCode()).isEqualTo(200);
+        assertThat(send("/api/v1/festivals/" + kaliSlug).statusCode()).isEqualTo(200);
+        assertThat(send("/api/v1/festivals/" + deletedSlug).statusCode()).isEqualTo(404);
+    }
+
     private HttpResponse<String> createFestival(String name, String slug, boolean published) throws Exception {
         return send(
                 "POST",
@@ -373,6 +552,25 @@ class AdminFestivalControllerIntegrationTest {
         request.put("description", "A festival profile description.");
         request.put("history", "History supplied by the administrator.");
         request.put("coverImageUrl", "https://example.com/festival-cover.jpg");
+        request.put("published", published);
+        return request;
+    }
+
+    private Map<String, Object> programmeRequest(
+            String title,
+            String programmeDate,
+            String startTime,
+            String endTime,
+            int displayOrder,
+            boolean published) {
+        Map<String, Object> request = new LinkedHashMap<>();
+        request.put("title", title);
+        request.put("description", "Programme details.");
+        request.put("programmeDate", programmeDate);
+        request.put("startTime", startTime);
+        request.put("endTime", endTime);
+        request.put("venue", "Festival venue");
+        request.put("displayOrder", displayOrder);
         request.put("published", published);
         return request;
     }

@@ -20,6 +20,7 @@ public record FestivalEditionResponse(
         List<FestivalAssociationOptionResponse> events,
         List<FestivalAssociationOptionResponse> galleryImages,
         List<FestivalAssociationOptionResponse> sponsors,
+        List<FestivalProgrammeResponse> programmes,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

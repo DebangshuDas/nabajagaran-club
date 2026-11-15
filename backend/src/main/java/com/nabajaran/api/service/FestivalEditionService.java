@@ -4,15 +4,18 @@ import com.nabajaran.api.dto.AdminFestivalEditionPageResponse;
 import com.nabajaran.api.dto.FestivalAssociationOptionResponse;
 import com.nabajaran.api.dto.FestivalEditionRequest;
 import com.nabajaran.api.dto.FestivalEditionResponse;
+import com.nabajaran.api.dto.FestivalProgrammeResponse;
 import com.nabajaran.api.entity.Event;
 import com.nabajaran.api.entity.Festival;
 import com.nabajaran.api.entity.FestivalEdition;
+import com.nabajaran.api.entity.FestivalProgramme;
 import com.nabajaran.api.entity.GalleryImage;
 import com.nabajaran.api.entity.Sponsor;
 import com.nabajaran.api.exception.ConflictException;
 import com.nabajaran.api.exception.ResourceNotFoundException;
 import com.nabajaran.api.repository.EventRepository;
 import com.nabajaran.api.repository.FestivalEditionRepository;
+import com.nabajaran.api.repository.FestivalProgrammeRepository;
 import com.nabajaran.api.repository.FestivalRepository;
 import com.nabajaran.api.repository.GalleryImageRepository;
 import com.nabajaran.api.repository.SponsorRepository;
@@ -39,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class FestivalEditionService {
 
     private final FestivalEditionRepository editionRepository;
+    private final FestivalProgrammeRepository programmeRepository;
     private final FestivalRepository festivalRepository;
     private final EventRepository eventRepository;
     private final GalleryImageRepository galleryImageRepository;
@@ -47,12 +51,14 @@ public class FestivalEditionService {
 
     public FestivalEditionService(
             FestivalEditionRepository editionRepository,
+            FestivalProgrammeRepository programmeRepository,
             FestivalRepository festivalRepository,
             EventRepository eventRepository,
             GalleryImageRepository galleryImageRepository,
             SponsorRepository sponsorRepository,
             EntityManager entityManager) {
         this.editionRepository = editionRepository;
+        this.programmeRepository = programmeRepository;
         this.festivalRepository = festivalRepository;
         this.eventRepository = eventRepository;
         this.galleryImageRepository = galleryImageRepository;
@@ -259,6 +265,13 @@ public class FestivalEditionService {
                         sponsor.isActive() ? "ACTIVE" : "INACTIVE",
                         sponsor.isActive()))
                 .toList();
+        List<FestivalProgrammeResponse> programmes = programmeRepository
+                .findByFestivalEdition_IdAndDeletedFalseOrderByProgrammeDateAscDisplayOrderAscStartTimeAscIdAsc(
+                        edition.getId())
+                .stream()
+                .filter(programme -> !publicView || programme.isPublished())
+                .map(this::toProgrammeResponse)
+                .toList();
 
         return new FestivalEditionResponse(
                 edition.getId(),
@@ -276,8 +289,26 @@ public class FestivalEditionService {
                 events,
                 galleryImages,
                 sponsors,
+                programmes,
                 edition.getCreatedAt(),
                 edition.getUpdatedAt());
+    }
+
+    private FestivalProgrammeResponse toProgrammeResponse(FestivalProgramme programme) {
+        return new FestivalProgrammeResponse(
+                programme.getId(),
+                programme.getFestivalEdition().getId(),
+                programme.getFestivalEdition().getYear(),
+                programme.getTitle(),
+                programme.getDescription(),
+                programme.getProgrammeDate(),
+                programme.getStartTime(),
+                programme.getEndTime(),
+                programme.getVenue(),
+                programme.getDisplayOrder(),
+                programme.isPublished(),
+                programme.getCreatedAt(),
+                programme.getUpdatedAt());
     }
 
     private String eventDetail(Event event) {

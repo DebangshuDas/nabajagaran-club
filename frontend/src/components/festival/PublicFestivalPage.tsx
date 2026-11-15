@@ -3,17 +3,23 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import type { PhotoTone } from "../../data/site";
 import { FestivalLayout } from "../ui/FestivalLayout";
-import { getPublicFestival } from "../../services/siteService";
-import type { FestivalEditionResponse, FestivalPublicResponse } from "../../types/api";
+import { getFestivalBySlug } from "../../services/siteService";
+import type {
+  FestivalEditionResponse,
+  FestivalProgrammeResponse,
+  FestivalPublicResponse,
+} from "../../types/api";
 
 type PublicFestivalPageProps = {
   slug: string;
   bengali: string;
   tone: PhotoTone;
   relatedLink: { label: string; to: string };
+  generic?: boolean;
 };
 
 const dateFormatter = new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" });
+const timeFormatter = new Intl.DateTimeFormat("en-IN", { timeStyle: "short" });
 
 function titleFromSlug(slug: string) {
   return slug
@@ -27,6 +33,30 @@ function formatDate(value: string | null | undefined) {
   if (!value) return null;
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? value : dateFormatter.format(date);
+}
+
+function formatTime(value: string) {
+  const [hours, minutes] = value.split(":").map(Number);
+  if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return value;
+  return timeFormatter.format(new Date(2000, 0, 1, hours, minutes));
+}
+
+function programmeTimeRange(programme: FestivalProgrammeResponse) {
+  const start = formatTime(programme.startTime);
+  if (!programme.endTime) return start;
+  const end = formatTime(programme.endTime);
+  const nextDay = programme.endTime < programme.startTime ? " (next day)" : "";
+  return `${start} – ${end}${nextDay}`;
+}
+
+function groupProgrammesByDate(programmes: FestivalProgrammeResponse[]) {
+  const groups = new Map<string, FestivalProgrammeResponse[]>();
+  for (const programme of programmes) {
+    const group = groups.get(programme.programmeDate) ?? [];
+    group.push(programme);
+    groups.set(programme.programmeDate, group);
+  }
+  return [...groups.entries()];
 }
 
 function formatDateRange(startDate?: string | null, endDate?: string | null) {
@@ -48,82 +78,169 @@ export function PublicFestivalPage({
   bengali,
   tone,
   relatedLink,
+  generic = false,
 }: PublicFestivalPageProps) {
   const [festival, setFestival] = useState<FestivalPublicResponse | null>(null);
   const [selectedEditionId, setSelectedEditionId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const displayName = festival?.name ?? titleFromSlug(slug);
+  const [notFound, setNotFound] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
+  const [requestedSlug, setRequestedSlug] = useState<string | null>(null);
+  const isCurrentRequest = requestedSlug === slug;
+  const isCurrentLoading = !isCurrentRequest || isLoading;
+  const currentFestival = isCurrentRequest ? festival : null;
+  const currentLoadError = isCurrentRequest ? loadError : null;
+  const currentNotFound = isCurrentRequest && notFound;
+  const displayName = currentFestival?.name ?? titleFromSlug(slug);
 
   useEffect(() => {
     let active = true;
-    getPublicFestival(slug)
+    getFestivalBySlug(slug)
       .then((response) => {
         if (!active) return;
         setFestival(response);
         setSelectedEditionId(response.editions[0]?.id ?? null);
+        setLoadError(null);
+        setNotFound(false);
+        setIsLoading(false);
+        setRequestedSlug(slug);
       })
       .catch((error: unknown) => {
         if (!active) return;
-        setLoadError(
-          axios.isAxiosError(error) && error.response?.status === 404
-            ? `${titleFromSlug(slug)} profile has not been published yet.`
-            : `${titleFromSlug(slug)} information is temporarily unavailable.`,
-        );
-      })
-      .finally(() => {
-        if (active) setIsLoading(false);
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+          if (generic) {
+            setNotFound(true);
+          } else {
+            setLoadError(`${titleFromSlug(slug)} profile has not been published yet.`);
+          }
+        } else {
+          setLoadError(`${titleFromSlug(slug)} information is temporarily unavailable.`);
+        }
+        setIsLoading(false);
+        setRequestedSlug(slug);
       });
     return () => {
       active = false;
     };
-  }, [slug]);
+  }, [generic, retryKey, slug]);
 
-  const editions = festival?.editions ?? [];
+  const editions = currentFestival?.editions ?? [];
   const selectedEdition =
     editions.find((edition) => edition.id === selectedEditionId) ?? editions[0];
+  const programmes = [...(selectedEdition?.programmes ?? [])].sort((left, right) =>
+    left.programmeDate.localeCompare(right.programmeDate)
+    || left.displayOrder - right.displayOrder
+    || left.startTime.localeCompare(right.startTime)
+    || left.id - right.id,
+  );
+  const programmeGroups = groupProgrammesByDate(programmes);
   const highlights = highlightsFor(selectedEdition);
-  const about = [
-    festival?.description?.trim(),
-    festival?.history?.trim(),
-  ].filter((paragraph): paragraph is string => Boolean(paragraph));
+  const about = generic
+    ? [currentFestival?.history?.trim()].filter((paragraph): paragraph is string => Boolean(paragraph))
+    : [currentFestival?.description?.trim(), currentFestival?.history?.trim()]
+      .filter((paragraph): paragraph is string => Boolean(paragraph));
 
-  if (!about.length) {
+  if (!generic && !about.length) {
     about.push(
-      loadError
-        ?? (isLoading
+      currentLoadError
+        ?? (isCurrentLoading
           ? "Loading published festival information."
           : "Festival details will appear here when the club publishes them."),
     );
   }
 
-  const moments = [
-    { title: "Dates", text: formatDateRange(selectedEdition?.startDate, selectedEdition?.endDate) },
-    { title: "Venue", text: selectedEdition?.venue || "Not announced" },
-    { title: "Theme", text: selectedEdition?.theme || "Not announced" },
-  ];
+  const moments = generic
+    ? [
+        selectedEdition?.startDate || selectedEdition?.endDate
+          ? { title: "Dates", text: formatDateRange(selectedEdition.startDate, selectedEdition.endDate) }
+          : null,
+        selectedEdition?.venue ? { title: "Venue", text: selectedEdition.venue } : null,
+        selectedEdition?.theme ? { title: "Theme", text: selectedEdition.theme } : null,
+      ].filter((moment): moment is { title: string; text: string } => moment !== null)
+    : [
+        { title: "Dates", text: formatDateRange(selectedEdition?.startDate, selectedEdition?.endDate) },
+        { title: "Venue", text: selectedEdition?.venue || "Not announced" },
+        { title: "Theme", text: selectedEdition?.theme || "Not announced" },
+      ];
   const hasAssociatedContent =
-    highlights.length > 0
+    programmes.length > 0
+    || highlights.length > 0
     || (selectedEdition?.galleryImages.length ?? 0) > 0
     || (selectedEdition?.sponsors.length ?? 0) > 0;
+
+  if (generic && isCurrentLoading) {
+    return (
+      <section className="mx-auto max-w-6xl px-5 py-20 md:px-8" role="status">
+        <p className="text-sm text-muted">Loading published festival...</p>
+      </section>
+    );
+  }
+
+  if (generic && currentNotFound) {
+    return (
+      <section className="mx-auto max-w-3xl px-5 py-24 md:px-8">
+        <p className="text-xs font-medium tracking-[0.22em] text-gold uppercase">404</p>
+        <h1 className="mt-3 font-display text-5xl text-maroon">Festival not found</h1>
+        <p className="mt-4 text-muted">This festival is not available or has not been published.</p>
+        <Link className="mt-8 inline-flex bg-maroon px-5 py-3 text-sm text-ivory" to="/festivals">
+          Browse festivals
+        </Link>
+      </section>
+    );
+  }
+
+  if (generic && currentLoadError) {
+    return (
+      <section className="mx-auto max-w-3xl px-5 py-24 md:px-8" role="alert">
+        <h1 className="font-display text-4xl text-maroon">Festival information unavailable</h1>
+        <p className="mt-4 text-muted">{currentLoadError}</p>
+        <button
+          className="mt-8 bg-maroon px-5 py-3 text-sm text-ivory"
+          onClick={() => {
+            setIsLoading(true);
+            setRequestedSlug(null);
+            setFestival(null);
+            setSelectedEditionId(null);
+            setLoadError(null);
+            setNotFound(false);
+            setRetryKey((key) => key + 1);
+          }}
+          type="button"
+        >
+          Try again
+        </button>
+      </section>
+    );
+  }
 
   return (
     <FestivalLayout
       bengali={bengali}
       title={displayName}
-      lede={
-        festival?.description?.trim()
-        || loadError
-        || (isLoading
+      lede={generic
+        ? currentFestival?.description?.trim() || undefined
+        : (
+        currentFestival?.description?.trim()
+        || currentLoadError
+        || (isCurrentLoading
           ? "Loading festival information..."
           : "Festival information will be shared here when published.")
-      }
+        )}
       photoLabel={displayName}
       tone={tone}
-      aboutTitle="Festival profile"
+      aboutTitle={
+        generic
+          ? about.length > 0
+            ? "Festival history"
+            : "Published edition details"
+          : "Festival profile"
+      }
       about={about}
       moments={moments}
-      coverImageUrl={festival?.coverImageUrl}
+      coverImageUrl={currentFestival?.coverImageUrl}
+      showAbout={!generic || about.length > 0 || moments.length > 0}
+      showAside={!generic || Boolean(selectedEdition?.description || selectedEdition?.events.length)}
       aside={
         <>
           <p className="text-xs font-medium tracking-[0.18em] text-maroon uppercase">
@@ -162,9 +279,9 @@ export function PublicFestivalPage({
                 </li>
               ))}
             </ul>
-          ) : (
+          ) : !generic && (
             <p className="mt-3 text-sm leading-relaxed text-ink/80">
-              {loadError ?? "No programme items are linked to this published edition."}
+              {currentLoadError ?? "No events are linked to this published edition."}
             </p>
           )}
           <Link
@@ -178,6 +295,39 @@ export function PublicFestivalPage({
     >
       {hasAssociatedContent && (
         <section className="mx-auto max-w-6xl space-y-14 px-5 pb-20 md:px-8">
+          {programmeGroups.length > 0 && (
+            <div>
+              <h2 className="font-display text-4xl text-maroon">Daily programme</h2>
+              <div className="mt-6 space-y-8">
+                {programmeGroups.map(([date, dayProgrammes]) => (
+                  <section className="border-l-2 border-gold pl-5" key={date}>
+                    <h3 className="font-display text-2xl text-maroon">{formatDate(date)}</h3>
+                    <ol className="mt-4 space-y-4">
+                      {dayProgrammes.map((programme) => (
+                        <li className="border-b border-line pb-4 last:border-b-0" key={programme.id}>
+                          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                            <h4 className="font-semibold text-ink">{programme.title}</h4>
+                            <p className="text-sm font-medium text-maroon">
+                              {programmeTimeRange(programme)}
+                            </p>
+                          </div>
+                          {programme.venue && (
+                            <p className="mt-1 text-sm text-muted">{programme.venue}</p>
+                          )}
+                          {programme.description && (
+                            <p className="mt-2 text-sm leading-relaxed text-ink/80">
+                              {programme.description}
+                            </p>
+                          )}
+                        </li>
+                      ))}
+                    </ol>
+                  </section>
+                ))}
+              </div>
+            </div>
+          )}
+
           {highlights.length > 0 && (
             <div>
               <h2 className="font-display text-4xl text-maroon">Featured highlights</h2>

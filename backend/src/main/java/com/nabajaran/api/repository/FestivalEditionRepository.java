@@ -3,6 +3,8 @@ package com.nabajaran.api.repository;
 import com.nabajaran.api.entity.FestivalEdition;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -17,6 +19,18 @@ public interface FestivalEditionRepository extends
 
     @EntityGraph(attributePaths = {"scheduledEvents", "galleryImages", "sponsors"})
     List<FestivalEdition> findByFestival_IdAndPublishedTrueAndDeletedFalseOrderByYearDesc(Long festivalId);
+
+    @Query("""
+            select edition from FestivalEdition edition
+            join fetch edition.festival festival
+            where festival.id in :festivalIds
+                and festival.published = true
+                and festival.deleted = false
+                and edition.published = true
+                and edition.deleted = false
+            order by festival.id asc, edition.year desc, edition.id desc
+            """)
+    List<FestivalEdition> findPublishedSummariesByFestivalIds(@Param("festivalIds") List<Long> festivalIds);
 
     boolean existsByFestival_IdAndYearAndDeletedFalse(Long festivalId, Integer year);
 
