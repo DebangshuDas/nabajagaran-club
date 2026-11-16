@@ -379,3 +379,78 @@ export interface FestivalPublicSummaryResponse {
   coverImageUrl?: string | null;
   latestEdition?: FestivalPublicEditionSummaryResponse | null;
 }
+
+export type HomepageSectionType =
+  | "EVENTS"
+  | "ANNOUNCEMENTS"
+  | "INITIATIVES"
+  | "FESTIVALS"
+  | "FESTIVAL_EDITIONS"
+  | "GALLERY_ALBUMS";
+
+export interface HomepagePublicContentResponse {
+  type: HomepageSectionType;
+  id: string;
+  title: string;
+  summary?: string | null;
+  detail?: string | null;
+  imageUrl?: string | null;
+  url: string;
+}
+
+export interface HomepagePublicSectionResponse {
+  type: HomepageSectionType;
+  visible: boolean;
+  displayOrder: number;
+  items: HomepagePublicContentResponse[];
+}
+
+export interface HomepagePublicResponse {
+  heroTitle: string;
+  heroSubtitle?: string | null;
+  heroImageUrl?: string | null;
+  ctaText?: string | null;
+  ctaUrl?: string | null;
+  sections: HomepagePublicSectionResponse[];
+}
+
+export interface HomepageOptionResponse {
+  id: string;
+  title: string;
+  detail?: string | null;
+  imageUrl?: string | null;
+}
+
+export interface HomepageAdminSectionResponse {
+  type: HomepageSectionType;
+  visible: boolean;
+  displayOrder: number;
+  selectedIds: string[];
+  options: HomepageOptionResponse[];
+}
+
+export interface HomepageAdminResponse {
+  heroTitle: string;
+  heroSubtitle?: string | null;
+  heroImageUrl?: string | null;
+  ctaText?: string | null;
+  ctaUrl?: string | null;
+  updatedAt: string;
+  sections: HomepageAdminSectionResponse[];
+}
+
+export interface HomepageUpdateSectionRequest {
+  type: HomepageSectionType;
+  visible: boolean;
+  displayOrder: number;
+  selectedIds: string[];
+}
+
+export interface HomepageUpdateRequest {
+  heroTitle: string;
+  heroSubtitle: string | null;
+  heroImageUrl: string | null;
+  ctaText: string | null;
+  ctaUrl: string | null;
+  sections: HomepageUpdateSectionRequest[];
+}

@@ -17,6 +17,7 @@ import {
   FestivalsManagementPage,
 } from "./pages/admin/FestivalsManagementPage";
 import { InitiativesManagementPage } from "./pages/admin/InitiativesManagementPage";
+import { HomepageManagementPage } from "./pages/admin/HomepageManagementPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import DirectoryPage from "./pages/DirectoryPage";
@@ -37,6 +38,7 @@ export default function App() {
       <Routes>
         <Route path="admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboardPage />} />
+          <Route path="homepage" element={<HomepageManagementPage />} />
           <Route path="events" element={<EventsManagementPage />} />
           <Route path="initiatives" element={<InitiativesManagementPage />} />
           <Route path="festivals" element={<FestivalsManagementPage />} />

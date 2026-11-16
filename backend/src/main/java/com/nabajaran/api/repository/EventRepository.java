@@ -13,6 +13,8 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
 
     List<Event> findByStatusAndPublishedTrueAndDeletedFalseOrderByStartAtAsc(EventStatus status);
 
+    List<Event> findByPublishedTrueAndDeletedFalseOrderByStartAtAscIdAsc();
+
     Optional<Event> findByIdAndDeletedFalse(Long id);
 
     List<Event> findAllByIdInAndDeletedFalse(List<Long> ids);

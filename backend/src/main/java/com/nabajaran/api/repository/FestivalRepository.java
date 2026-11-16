@@ -16,6 +16,8 @@ public interface FestivalRepository extends JpaRepository<Festival, Long>, JpaSp
 
     List<Festival> findByPublishedTrueAndDeletedFalseOrderByNameAsc();
 
+    List<Festival> findAllByIdInAndPublishedTrueAndDeletedFalse(List<Long> ids);
+
     boolean existsBySlug(String slug);
 
     boolean existsBySlugAndIdNot(String slug, Long id);

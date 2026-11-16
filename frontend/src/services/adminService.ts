@@ -28,10 +28,29 @@ import type {
   FestivalProgrammeReorderRequest,
   FestivalRequest,
   FestivalResponse,
+  HomepageAdminResponse,
+  HomepageUpdateRequest,
 } from "../types/api";
 
 export async function getClubProfile() {
   const response = await api.get<ClubDetailsResponse>("/club");
+  return response.data;
+}
+
+export async function getAdminHomepage(authorization: string) {
+  const response = await api.get<HomepageAdminResponse>("/admin/homepage", {
+    headers: { Authorization: authorization },
+  });
+  return response.data;
+}
+
+export async function updateAdminHomepage(
+  authorization: string,
+  request: HomepageUpdateRequest,
+) {
+  const response = await api.put<HomepageAdminResponse>("/admin/homepage", request, {
+    headers: { Authorization: authorization },
+  });
   return response.data;
 }
 

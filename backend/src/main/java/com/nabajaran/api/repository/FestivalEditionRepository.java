@@ -20,6 +20,9 @@ public interface FestivalEditionRepository extends
     @EntityGraph(attributePaths = {"scheduledEvents", "galleryImages", "sponsors"})
     List<FestivalEdition> findByFestival_IdAndPublishedTrueAndDeletedFalseOrderByYearDesc(Long festivalId);
 
+    @EntityGraph(attributePaths = "festival")
+    List<FestivalEdition> findByPublishedTrueAndDeletedFalseOrderByYearDescIdDesc();
+
     @Query("""
             select edition from FestivalEdition edition
             join fetch edition.festival festival

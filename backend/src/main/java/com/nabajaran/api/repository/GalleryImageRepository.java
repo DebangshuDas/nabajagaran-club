@@ -12,4 +12,6 @@ public interface GalleryImageRepository extends
         JpaSpecificationExecutor<GalleryImage> {
 
     List<GalleryImage> findAllByIdInAndDeletedFalse(List<Long> ids);
+
+    List<GalleryImage> findByPublicImageTrueAndDeletedFalseAndCategoryIsNotNullOrderByCategoryAscIdAsc();
 }

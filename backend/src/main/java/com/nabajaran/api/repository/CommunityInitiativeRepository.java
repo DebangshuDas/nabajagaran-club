@@ -18,6 +18,8 @@ public interface CommunityInitiativeRepository extends
     @EntityGraph(attributePaths = "relatedEvents")
     List<CommunityInitiative> findByPublishedTrueAndDeletedFalseOrderByStartDateAscIdAsc();
 
+    List<CommunityInitiative> findByPublishedTrueAndDeletedFalseOrderByTitleAsc();
+
     boolean existsBySlug(String slug);
 
     boolean existsBySlugAndIdNot(String slug, Long id);
