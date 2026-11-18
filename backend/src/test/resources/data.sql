@@ -296,7 +296,7 @@ SELECT
     'Event setup, community outreach',
     'Available on weekends',
     'Sample volunteer record for development and testing.',
-    'pending',
+    'PENDING',
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP,
     FALSE,

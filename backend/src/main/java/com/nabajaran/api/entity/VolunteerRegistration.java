@@ -1,7 +1,10 @@
 package com.nabajaran.api.entity;
 
+import com.nabajaran.api.enums.ApprovalStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,6 +13,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(
@@ -48,8 +52,21 @@ public class VolunteerRegistration extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String motivation;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private String status = "pending";
+    private ApprovalStatus status = ApprovalStatus.PENDING;
+
+    @Column(name = "reviewed_at")
+    private LocalDateTime reviewedAt;
+
+    @Column(name = "reviewed_by", length = 150)
+    private String reviewedBy;
+
+    @Column(name = "internal_notes", columnDefinition = "TEXT")
+    private String internalNotes;
+
+    @Column(name = "pending_email", length = 150, unique = true)
+    private String pendingEmail;
 
     public Long getId() {
         return id;
@@ -115,11 +132,43 @@ public class VolunteerRegistration extends BaseEntity {
         this.motivation = motivation;
     }
 
-    public String getStatus() {
+    public ApprovalStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(ApprovalStatus status) {
         this.status = status;
+    }
+
+    public LocalDateTime getReviewedAt() {
+        return reviewedAt;
+    }
+
+    public void setReviewedAt(LocalDateTime reviewedAt) {
+        this.reviewedAt = reviewedAt;
+    }
+
+    public String getReviewedBy() {
+        return reviewedBy;
+    }
+
+    public void setReviewedBy(String reviewedBy) {
+        this.reviewedBy = reviewedBy;
+    }
+
+    public String getInternalNotes() {
+        return internalNotes;
+    }
+
+    public void setInternalNotes(String internalNotes) {
+        this.internalNotes = internalNotes;
+    }
+
+    public String getPendingEmail() {
+        return pendingEmail;
+    }
+
+    public void setPendingEmail(String pendingEmail) {
+        this.pendingEmail = pendingEmail;
     }
 }
