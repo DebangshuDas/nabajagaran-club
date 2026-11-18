@@ -126,8 +126,13 @@ export function AdminLayout() {
                   }`
                 }
                 title={
+<<<<<<< Updated upstream
                   to === "/admin" || label === "Homepage" || label === "Announcements" || label === "Club profile"
                     || label === "Initiatives" || label === "Festivals"
+=======
+                  to === "/admin" || label === "Announcements" || label === "Club profile"
+                    || label === "Initiatives" || label === "Festivals" || label === "Gallery"
+>>>>>>> Stashed changes
                     ? undefined
                     : "This module is a route placeholder"
                 }
@@ -136,8 +141,13 @@ export function AdminLayout() {
                   <>
                     <Icon size={17} strokeWidth={1.8} />
                     <span className="flex-1">{label}</span>
+<<<<<<< Updated upstream
                     {to !== "/admin" && label !== "Homepage" && label !== "Announcements" && label !== "Club profile"
                       && label !== "Initiatives" && label !== "Festivals" && (
+=======
+                    {to !== "/admin" && label !== "Announcements" && label !== "Club profile"
+                      && label !== "Initiatives" && label !== "Festivals" && label !== "Gallery" && (
+>>>>>>> Stashed changes
                       <span
                         className={`rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${
                           isActive

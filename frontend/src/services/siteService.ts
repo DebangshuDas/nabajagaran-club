@@ -7,11 +7,18 @@ import type {
   EventResponse,
   FestivalPublicResponse,
   FestivalPublicSummaryResponse,
+<<<<<<< Updated upstream
   HomepagePublicResponse,
+=======
+  GalleryAlbumResponse,
+>>>>>>> Stashed changes
 } from "../types/api";
 
-async function getArrayResponse<T>(endpoint: string): Promise<T[]> {
-  const response = await api.get<unknown>(endpoint);
+async function getArrayResponse<T>(
+  endpoint: string,
+  params?: Record<string, string>,
+): Promise<T[]> {
+  const response = await api.get<unknown>(endpoint, { params });
 
   if (!Array.isArray(response.data)) {
     throw new Error(`Invalid API response from ${endpoint}: expected a JSON array.`);
@@ -52,7 +59,15 @@ export async function getFestivalBySlug(slug: string) {
   return response.data;
 }
 
+<<<<<<< Updated upstream
 export async function getHomepage() {
   const response = await api.get<HomepagePublicResponse>("/homepage");
   return response.data;
+=======
+export async function getPublishedGalleryAlbums(category?: string) {
+  return getArrayResponse<GalleryAlbumResponse>(
+    "/gallery/albums",
+    category ? { category } : undefined,
+  );
+>>>>>>> Stashed changes
 }

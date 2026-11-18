@@ -1,6 +1,7 @@
 package com.nabajaran.api.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record EventResponse(
         Long id,
@@ -17,6 +18,7 @@ public record EventResponse(
         boolean published,
         Integer capacity,
         String imageUrl,
+        List<GalleryImageResponse> galleryImages,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

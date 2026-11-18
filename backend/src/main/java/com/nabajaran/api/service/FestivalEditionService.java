@@ -48,6 +48,7 @@ public class FestivalEditionService {
     private final GalleryImageRepository galleryImageRepository;
     private final SponsorRepository sponsorRepository;
     private final EntityManager entityManager;
+    private final GalleryService galleryService;
 
     public FestivalEditionService(
             FestivalEditionRepository editionRepository,
@@ -56,7 +57,8 @@ public class FestivalEditionService {
             EventRepository eventRepository,
             GalleryImageRepository galleryImageRepository,
             SponsorRepository sponsorRepository,
-            EntityManager entityManager) {
+            EntityManager entityManager,
+            GalleryService galleryService) {
         this.editionRepository = editionRepository;
         this.programmeRepository = programmeRepository;
         this.festivalRepository = festivalRepository;
@@ -64,6 +66,7 @@ public class FestivalEditionService {
         this.galleryImageRepository = galleryImageRepository;
         this.sponsorRepository = sponsorRepository;
         this.entityManager = entityManager;
+        this.galleryService = galleryService;
     }
 
     @Transactional(readOnly = true)
@@ -76,8 +79,16 @@ public class FestivalEditionService {
         Page<FestivalEdition> editions = editionRepository.findAll(
                 specification,
                 PageRequest.of(page, size, Sort.by("year").descending().and(Sort.by("id").descending())));
+        Map<Long, List<FestivalAssociationOptionResponse>> albumImages = galleryService.getEditionImages(
+                editions.getContent().stream().map(FestivalEdition::getId).toList(),
+                false);
         return new AdminFestivalEditionPageResponse(
-                editions.getContent().stream().map(edition -> toResponse(edition, false)).toList(),
+                editions.getContent().stream()
+                        .map(edition -> toResponse(
+                                edition,
+                                false,
+                                albumImages.getOrDefault(edition.getId(), List.of())))
+                        .toList(),
                 editions.getNumber(),
                 editions.getSize(),
                 editions.getTotalElements(),
@@ -145,10 +156,17 @@ public class FestivalEditionService {
 
     @Transactional(readOnly = true)
     public List<FestivalEditionResponse> getPublishedEditions(Long festivalId) {
-        return editionRepository
-                .findByFestival_IdAndPublishedTrueAndDeletedFalseOrderByYearDesc(festivalId)
+        List<FestivalEdition> editions = editionRepository
+                .findByFestival_IdAndPublishedTrueAndDeletedFalseOrderByYearDesc(festivalId);
+        Map<Long, List<FestivalAssociationOptionResponse>> albumImages = galleryService.getEditionImages(
+                editions.stream().map(FestivalEdition::getId).toList(),
+                true);
+        return editions
                 .stream()
-                .map(edition -> toResponse(edition, true))
+                .map(edition -> toResponse(
+                        edition,
+                        true,
+                        albumImages.getOrDefault(edition.getId(), List.of())))
                 .toList();
     }
 
@@ -225,6 +243,18 @@ public class FestivalEditionService {
     }
 
     private FestivalEditionResponse toResponse(FestivalEdition edition, boolean publicView) {
+        Map<Long, List<FestivalAssociationOptionResponse>> albumImages =
+                galleryService.getEditionImages(List.of(edition.getId()), publicView);
+        return toResponse(
+                edition,
+                publicView,
+                albumImages.getOrDefault(edition.getId(), List.of()));
+    }
+
+    private FestivalEditionResponse toResponse(
+            FestivalEdition edition,
+            boolean publicView,
+            List<FestivalAssociationOptionResponse> editionAlbumImages) {
         List<FestivalAssociationOptionResponse> events = edition.getScheduledEvents().stream()
                 .filter(event -> !event.isDeleted() && (!publicView || event.isPublished()))
                 .sorted(Comparator.comparing(Event::getStartAt).thenComparing(Event::getTitle))
@@ -233,15 +263,14 @@ public class FestivalEditionService {
                         event.getTitle(),
                         eventDetail(event),
                         event.getImageUrl(),
+                        null,
                         event.getStartAt(),
                         event.getStatus().name(),
                         event.isPublished()))
                 .toList();
-        List<FestivalAssociationOptionResponse> galleryImages = edition.getGalleryImages().stream()
+        Map<Long, FestivalAssociationOptionResponse> galleryImagesById = new LinkedHashMap<>();
+        edition.getGalleryImages().stream()
                 .filter(image -> !image.isDeleted() && (!publicView || image.isPublicImage()))
-                .sorted(Comparator.comparing(
-                        image -> image.getTitle() == null ? "" : image.getTitle(),
-                        String.CASE_INSENSITIVE_ORDER))
                 .map(image -> new FestivalAssociationOptionResponse(
                         image.getId(),
                         image.getTitle() == null || image.getTitle().isBlank()
@@ -249,9 +278,16 @@ public class FestivalEditionService {
                                 : image.getTitle(),
                         image.getCaption(),
                         image.getImageUrl(),
+                        image.getAltText(),
                         null,
                         image.isPublicImage() ? "PUBLIC" : "PRIVATE",
                         image.isPublicImage()))
+                .forEach(image -> galleryImagesById.put(image.id(), image));
+        editionAlbumImages.forEach(image -> galleryImagesById.putIfAbsent(image.id(), image));
+        List<FestivalAssociationOptionResponse> galleryImages = galleryImagesById.values().stream()
+                .sorted(Comparator.comparing(
+                        image -> image.label() == null ? "" : image.label(),
+                        String.CASE_INSENSITIVE_ORDER))
                 .toList();
         List<FestivalAssociationOptionResponse> sponsors = edition.getSponsors().stream()
                 .filter(sponsor -> !sponsor.isDeleted() && (!publicView || sponsor.isActive()))
@@ -261,6 +297,7 @@ public class FestivalEditionService {
                         sponsor.getName(),
                         sponsor.getSponsorTier(),
                         sponsor.getLogoUrl(),
+                        null,
                         null,
                         sponsor.isActive() ? "ACTIVE" : "INACTIVE",
                         sponsor.isActive()))

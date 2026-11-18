@@ -28,8 +28,19 @@ import type {
   FestivalProgrammeReorderRequest,
   FestivalRequest,
   FestivalResponse,
+<<<<<<< Updated upstream
   HomepageAdminResponse,
   HomepageUpdateRequest,
+=======
+  AdminGalleryAlbumPageResponse,
+  AdminGalleryAssociationPageResponse,
+  GalleryAlbumRequest,
+  GalleryAlbumResponse,
+  GalleryAssociationType,
+  GalleryImageMetadataRequest,
+  GalleryImageOrderRequest,
+  GalleryImageResponse,
+>>>>>>> Stashed changes
 } from "../types/api";
 
 export async function getClubProfile() {
@@ -525,4 +536,158 @@ export async function deleteAdminFestivalProgramme(
     `/admin/festivals/${festivalId}/editions/${editionId}/programmes/${programmeId}`,
     { headers: { Authorization: authorization } },
   );
+}
+
+export async function getAdminGalleryAlbums(
+  authorization: string,
+  query: {
+    search: string;
+    category: string;
+    published: boolean | undefined;
+    page: number;
+    size: number;
+  },
+) {
+  const response = await api.get<AdminGalleryAlbumPageResponse>("/admin/gallery/albums", {
+    headers: { Authorization: authorization },
+    params: query,
+  });
+  return response.data;
+}
+
+export async function getAdminGalleryAlbum(authorization: string, albumId: number) {
+  const response = await api.get<GalleryAlbumResponse>(`/admin/gallery/albums/${albumId}`, {
+    headers: { Authorization: authorization },
+  });
+  return response.data;
+}
+
+export async function createAdminGalleryAlbum(
+  authorization: string,
+  request: GalleryAlbumRequest,
+) {
+  const response = await api.post<GalleryAlbumResponse>("/admin/gallery/albums", request, {
+    headers: { Authorization: authorization },
+  });
+  return response.data;
+}
+
+export async function updateAdminGalleryAlbum(
+  authorization: string,
+  albumId: number,
+  request: GalleryAlbumRequest,
+) {
+  const response = await api.put<GalleryAlbumResponse>(`/admin/gallery/albums/${albumId}`, request, {
+    headers: { Authorization: authorization },
+  });
+  return response.data;
+}
+
+export async function publishAdminGalleryAlbum(authorization: string, albumId: number) {
+  const response = await api.patch<GalleryAlbumResponse>(
+    `/admin/gallery/albums/${albumId}/publish`,
+    undefined,
+    { headers: { Authorization: authorization } },
+  );
+  return response.data;
+}
+
+export async function unpublishAdminGalleryAlbum(authorization: string, albumId: number) {
+  const response = await api.patch<GalleryAlbumResponse>(
+    `/admin/gallery/albums/${albumId}/unpublish`,
+    undefined,
+    { headers: { Authorization: authorization } },
+  );
+  return response.data;
+}
+
+export async function deleteAdminGalleryAlbum(authorization: string, albumId: number) {
+  await api.delete(`/admin/gallery/albums/${albumId}`, {
+    headers: { Authorization: authorization },
+  });
+}
+
+export async function uploadAdminGalleryImages(
+  authorization: string,
+  albumId: number,
+  files: File[],
+) {
+  const formData = new FormData();
+  files.forEach((file) => formData.append("files", file));
+  const response = await api.post<GalleryImageResponse[]>(
+    `/admin/gallery/albums/${albumId}/images`,
+    formData,
+    {
+      headers: {
+        Authorization: authorization,
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
+  return response.data;
+}
+
+export async function updateAdminGalleryImage(
+  authorization: string,
+  imageId: number,
+  request: GalleryImageMetadataRequest,
+) {
+  const response = await api.put<GalleryImageResponse>(
+    `/admin/gallery/images/${imageId}`,
+    request,
+    { headers: { Authorization: authorization } },
+  );
+  return response.data;
+}
+
+export async function publishAdminGalleryImage(authorization: string, imageId: number) {
+  const response = await api.patch<GalleryImageResponse>(
+    `/admin/gallery/images/${imageId}/publish`,
+    undefined,
+    { headers: { Authorization: authorization } },
+  );
+  return response.data;
+}
+
+export async function unpublishAdminGalleryImage(authorization: string, imageId: number) {
+  const response = await api.patch<GalleryImageResponse>(
+    `/admin/gallery/images/${imageId}/unpublish`,
+    undefined,
+    { headers: { Authorization: authorization } },
+  );
+  return response.data;
+}
+
+export async function deleteAdminGalleryImage(authorization: string, imageId: number) {
+  await api.delete(`/admin/gallery/images/${imageId}`, {
+    headers: { Authorization: authorization },
+  });
+}
+
+export async function reorderAdminGalleryImages(
+  authorization: string,
+  albumId: number,
+  request: GalleryImageOrderRequest,
+) {
+  const response = await api.put<GalleryImageResponse[]>(
+    `/admin/gallery/albums/${albumId}/images/order`,
+    request,
+    { headers: { Authorization: authorization } },
+  );
+  return response.data;
+}
+
+export async function getGalleryAssociationOptions(
+  authorization: string,
+  type: GalleryAssociationType,
+  search: string,
+) {
+  const response = await api.get<AdminGalleryAssociationPageResponse>(
+    "/admin/gallery/associations",
+    {
+      headers: { Authorization: authorization },
+      params: { type, search, page: 0, size: 100 },
+    },
+  );
+  return response.data;
 }

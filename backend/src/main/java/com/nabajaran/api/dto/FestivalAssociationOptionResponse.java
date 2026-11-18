@@ -7,6 +7,7 @@ public record FestivalAssociationOptionResponse(
         String label,
         String detail,
         String imageUrl,
+        String altText,
         LocalDateTime startAt,
         String status,
         boolean published

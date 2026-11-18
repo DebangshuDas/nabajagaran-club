@@ -6,6 +6,7 @@ import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 import { AnnouncementsManagementPage } from "./pages/admin/AnnouncementsManagementPage";
 import { ClubProfileManagementPage } from "./pages/admin/ClubProfileManagementPage";
 import { EventsManagementPage } from "./pages/admin/EventsManagementPage";
+import { GalleryManagementPage } from "./pages/admin/GalleryManagementPage";
 import {
   FestivalProgrammeEditorPage,
   FestivalProgrammesPage,
@@ -60,7 +61,7 @@ export default function App() {
           <Route path="businesses" element={<AdminModulePlaceholder title="Business directory" />} />
           <Route path="membership" element={<AdminModulePlaceholder title="Membership" />} />
           <Route path="volunteers" element={<AdminModulePlaceholder title="Volunteers" />} />
-          <Route path="gallery" element={<AdminModulePlaceholder title="Gallery" />} />
+          <Route path="gallery" element={<GalleryManagementPage />} />
           <Route path="sponsors" element={<AdminModulePlaceholder title="Sponsors" />} />
           <Route path="messages" element={<AdminModulePlaceholder title="Contact messages" />} />
           <Route path="club-profile" element={<ClubProfileManagementPage />} />

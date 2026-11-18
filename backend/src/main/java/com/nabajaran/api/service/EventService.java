@@ -3,6 +3,7 @@ package com.nabajaran.api.service;
 import com.nabajaran.api.dto.EventResponse;
 import com.nabajaran.api.dto.AdminEventPageResponse;
 import com.nabajaran.api.dto.EventRequest;
+import com.nabajaran.api.dto.GalleryImageResponse;
 import com.nabajaran.api.entity.ClubInformation;
 import com.nabajaran.api.entity.Event;
 import com.nabajaran.api.enums.EventStatus;
@@ -13,6 +14,7 @@ import com.nabajaran.api.repository.EventRepository;
 import jakarta.persistence.EntityManager;
 import java.text.Normalizer;
 import java.util.List;
+import java.util.Map;
 import java.util.Locale;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -30,21 +32,28 @@ public class EventService {
     private final EventRepository eventRepository;
     private final ClubInformationRepository clubInformationRepository;
     private final EntityManager entityManager;
+    private final GalleryService galleryService;
 
     public EventService(
             EventRepository eventRepository,
             ClubInformationRepository clubInformationRepository,
-            EntityManager entityManager) {
+            EntityManager entityManager,
+            GalleryService galleryService) {
         this.eventRepository = eventRepository;
         this.clubInformationRepository = clubInformationRepository;
         this.entityManager = entityManager;
+        this.galleryService = galleryService;
     }
 
     @Transactional(readOnly = true)
     public List<EventResponse> getUpcomingEvents() {
-        return eventRepository.findByStatusAndPublishedTrueAndDeletedFalseOrderByStartAtAsc(EventStatus.UPCOMING)
+        List<Event> events = eventRepository.findByStatusAndPublishedTrueAndDeletedFalseOrderByStartAtAsc(
+                EventStatus.UPCOMING);
+        Map<Long, List<GalleryImageResponse>> galleryByEvent =
+                galleryService.getPublishedEventImages(events.stream().map(Event::getId).toList());
+        return events
                 .stream()
-                .map(this::toResponse)
+                .map(event -> toResponse(event, galleryByEvent.getOrDefault(event.getId(), List.of())))
                 .toList();
     }
 
@@ -205,6 +214,10 @@ public class EventService {
     }
 
     private EventResponse toResponse(Event event) {
+        return toResponse(event, List.of());
+    }
+
+    private EventResponse toResponse(Event event, List<GalleryImageResponse> galleryImages) {
         return new EventResponse(
                 event.getId(),
                 event.getTitle(),
@@ -220,6 +233,7 @@ public class EventService {
                 event.isPublished(),
                 event.getCapacity(),
                 event.getImageUrl(),
+                galleryImages,
                 event.getCreatedAt(),
                 event.getUpdatedAt()
         );

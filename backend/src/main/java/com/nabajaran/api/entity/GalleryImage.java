@@ -16,7 +16,9 @@ import jakarta.persistence.Table;
         name = "gallery_images",
         indexes = {
                 @Index(name = "idx_gallery_images_club_information_id", columnList = "club_information_id"),
-                @Index(name = "idx_gallery_images_public", columnList = "is_public, deleted")
+                @Index(name = "idx_gallery_images_public", columnList = "is_public, deleted"),
+                @Index(name = "idx_gallery_images_album_order", columnList = "album_id, display_order, deleted"),
+                @Index(name = "idx_gallery_images_storage_key", columnList = "storage_key")
         }
 )
 public class GalleryImage extends BaseEntity {
@@ -35,8 +37,15 @@ public class GalleryImage extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String caption;
 
-    @Column(name = "image_url", nullable = false, length = 255)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "album_id", nullable = false)
+    private GalleryAlbum album;
+
+    @Column(name = "image_url", nullable = false, length = 2048)
     private String imageUrl;
+
+    @Column(name = "storage_key", length = 512)
+    private String storageKey;
 
     @Column(name = "alt_text", length = 255)
     private String altText;
@@ -45,7 +54,10 @@ public class GalleryImage extends BaseEntity {
     private String category;
 
     @Column(name = "is_public", nullable = false)
-    private boolean publicImage = true;
+    private boolean publicImage;
+
+    @Column(name = "display_order", nullable = false)
+    private int displayOrder;
 
     public Long getId() {
         return id;
@@ -87,6 +99,22 @@ public class GalleryImage extends BaseEntity {
         this.imageUrl = imageUrl;
     }
 
+    public GalleryAlbum getAlbum() {
+        return album;
+    }
+
+    public void setAlbum(GalleryAlbum album) {
+        this.album = album;
+    }
+
+    public String getStorageKey() {
+        return storageKey;
+    }
+
+    public void setStorageKey(String storageKey) {
+        this.storageKey = storageKey;
+    }
+
     public String getAltText() {
         return altText;
     }
@@ -109,5 +137,13 @@ public class GalleryImage extends BaseEntity {
 
     public void setPublicImage(boolean publicImage) {
         this.publicImage = publicImage;
+    }
+
+    public int getDisplayOrder() {
+        return displayOrder;
+    }
+
+    public void setDisplayOrder(int displayOrder) {
+        this.displayOrder = displayOrder;
     }
 }

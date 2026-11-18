@@ -352,7 +352,7 @@ export function PublicFestivalPage({
                   <figure className="overflow-hidden border border-line bg-white" key={image.id}>
                     {image.imageUrl && (
                       <img
-                        alt={image.label}
+                        alt={image.altText?.trim() || image.label}
                         className="aspect-[4/3] w-full object-cover"
                         src={image.imageUrl}
                       />

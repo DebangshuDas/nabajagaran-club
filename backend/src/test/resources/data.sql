@@ -242,12 +242,41 @@ WHERE EXISTS (SELECT 1 FROM club_information)
       SELECT 1 FROM sponsors WHERE slug = 'demo-community-supporter'
   );
 
+INSERT INTO gallery_albums (
+    club_information_id, title, category, is_published, created_at, updated_at, deleted
+)
+SELECT
+    (SELECT id FROM club_information ORDER BY id LIMIT 1),
+    'General gallery',
+    'GENERAL',
+    TRUE,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    FALSE
+WHERE EXISTS (SELECT 1 FROM club_information)
+  AND NOT EXISTS (
+      SELECT 1
+      FROM gallery_albums
+      WHERE club_information_id = (SELECT id FROM club_information ORDER BY id LIMIT 1)
+        AND category = 'GENERAL'
+        AND deleted = FALSE
+  );
+
 INSERT INTO gallery_images (
-    club_information_id, title, caption, image_url, alt_text, category, is_public,
+    club_information_id, album_id, title, caption, image_url, alt_text, category, is_public,
     created_at, updated_at, deleted, deleted_at
 )
 SELECT
     (SELECT id FROM club_information ORDER BY id LIMIT 1),
+    (
+        SELECT id
+        FROM gallery_albums
+        WHERE club_information_id = (SELECT id FROM club_information ORDER BY id LIMIT 1)
+          AND category = 'GENERAL'
+          AND deleted = FALSE
+        ORDER BY id
+        LIMIT 1
+    ),
     'Community Gathering',
     'A placeholder image entry for a community gathering.',
     '/images/demo-community-gathering.jpg',

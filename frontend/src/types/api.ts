@@ -52,8 +52,91 @@ export interface EventResponse {
   published: boolean;
   capacity?: number | null;
   imageUrl?: string | null;
+  galleryImages: GalleryImageResponse[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface GalleryImageResponse {
+  id: number;
+  albumId: number;
+  title?: string | null;
+  caption?: string | null;
+  altText?: string | null;
+  imageUrl: string;
+  displayOrder: number;
+  published: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GalleryAlbumResponse {
+  id: number;
+  title: string;
+  description?: string | null;
+  category?: string | null;
+  coverImageUrl?: string | null;
+  eventId?: number | null;
+  eventTitle?: string | null;
+  initiativeId?: number | null;
+  initiativeTitle?: string | null;
+  festivalEditionId?: number | null;
+  festivalName?: string | null;
+  editionYear?: number | null;
+  published: boolean;
+  imageCount: number;
+  images: GalleryImageResponse[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminGalleryAlbumPageResponse {
+  content: GalleryAlbumResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export type GalleryAssociationType = "EVENT" | "INITIATIVE" | "FESTIVAL_EDITION";
+
+export interface GalleryAssociationOptionResponse {
+  type: GalleryAssociationType;
+  id: number;
+  label: string;
+  detail?: string | null;
+}
+
+export interface AdminGalleryAssociationPageResponse {
+  content: GalleryAssociationOptionResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface GalleryAlbumRequest {
+  title: string;
+  description: string | null;
+  category: string | null;
+  coverImageId: number | null;
+  eventId: number | null;
+  initiativeId: number | null;
+  festivalEditionId: number | null;
+  published: boolean;
+}
+
+export interface GalleryImageMetadataRequest {
+  albumId: number;
+  title: string | null;
+  caption: string | null;
+  altText: string | null;
+  displayOrder: number;
+  published: boolean;
+}
+
+export interface GalleryImageOrderRequest {
+  imageIds: number[];
 }
 
 export type EventStatus = "UPCOMING" | "ONGOING" | "COMPLETED";
@@ -314,6 +397,7 @@ export interface FestivalAssociationOptionResponse {
   label: string;
   detail?: string | null;
   imageUrl?: string | null;
+  altText?: string | null;
   startAt?: string | null;
   status: string;
   available: boolean;

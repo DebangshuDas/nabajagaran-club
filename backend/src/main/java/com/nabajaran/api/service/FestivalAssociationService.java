@@ -121,6 +121,7 @@ public class FestivalAssociationService {
                 event.getTitle(),
                 detail,
                 event.getImageUrl(),
+                null,
                 event.getStartAt(),
                 event.getStatus().name(),
                 event.isPublished());
@@ -138,6 +139,7 @@ public class FestivalAssociationService {
                 label,
                 detail,
                 image.getImageUrl(),
+                image.getAltText(),
                 null,
                 image.isPublicImage() ? "PUBLIC" : "PRIVATE",
                 image.isPublicImage());
@@ -149,6 +151,7 @@ public class FestivalAssociationService {
                 sponsor.getName(),
                 sponsor.getSponsorTier(),
                 sponsor.getLogoUrl(),
+                null,
                 null,
                 sponsor.isActive() ? "ACTIVE" : "INACTIVE",
                 sponsor.isActive());

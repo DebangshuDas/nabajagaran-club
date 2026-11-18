@@ -17,6 +17,19 @@ export function EventCard({ event }: { event: EventResponse }) {
       </div>
       <h3 className="mt-4 font-display text-3xl text-maroon">{event.title}</h3>
       <p className="mt-3 flex-1 leading-relaxed text-muted">{event.shortDescription || event.description}</p>
+      {event.galleryImages.length > 0 && (
+        <div className="mt-5 grid grid-cols-3 gap-2" aria-label={`${event.title} gallery`}>
+          {event.galleryImages.slice(0, 3).map((image) => (
+            <img
+              alt={image.altText?.trim() || image.title?.trim() || event.title}
+              className="aspect-square w-full object-cover"
+              key={image.id}
+              loading="lazy"
+              src={image.imageUrl}
+            />
+          ))}
+        </div>
+      )}
       <p className="mt-6 flex items-center gap-2 text-sm text-ink">
         <Calendar className="size-4 text-gold" aria-hidden="true" />
         {eventDate}

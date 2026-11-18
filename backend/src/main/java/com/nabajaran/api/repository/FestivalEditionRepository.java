@@ -17,6 +17,8 @@ public interface FestivalEditionRepository extends
 
     Optional<FestivalEdition> findByIdAndFestival_IdAndDeletedFalse(Long id, Long festivalId);
 
+    Optional<FestivalEdition> findByIdAndDeletedFalse(Long id);
+
     @EntityGraph(attributePaths = {"scheduledEvents", "galleryImages", "sponsors"})
     List<FestivalEdition> findByFestival_IdAndPublishedTrueAndDeletedFalseOrderByYearDesc(Long festivalId);
 
